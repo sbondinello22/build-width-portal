@@ -8,11 +8,16 @@ import { clientsRouter } from "./modules/clients/clients.routes";
 import { projectsRouter } from "./modules/projects/projects.routes";
 import { timeEntriesRouter } from "./modules/time-entries/time-entries.routes";
 import { invoicesRouter } from "./modules/invoices/invoices.routes";
+import { webhookHandler } from "./modules/payments/payments.controller";
+import { asyncHandler } from "./utils/asyncHandler";
 
 export const app = express();
 
 app.use(cors({ origin: env.CORS_ORIGIN, credentials: true }));
 app.use(cookieParser());
+
+app.post("/api/webhooks/stripe", express.raw({ type: "application/json" }), asyncHandler(webhookHandler));
+
 app.use(express.json());
 
 app.get("/api/health", (_req, res) => res.json({ ok: true }));

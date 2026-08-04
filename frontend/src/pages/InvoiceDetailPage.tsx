@@ -1,8 +1,9 @@
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "../context/AuthContext";
 import { getInvoice, invoicePdfUrl, sendInvoice, updateInvoiceStatus } from "../api/invoices";
 import type { InvoiceStatus } from "../api/invoices";
+import { createCheckoutSession } from "../api/payments";
 
 const editableStatuses: InvoiceStatus[] = ["DRAFT", "SENT", "OVERDUE", "VOID"];
 
@@ -12,8 +13,17 @@ export function InvoiceDetailPage() {
   const { user } = useAuth();
   const isAdmin = user?.role === "ADMIN";
   const queryClient = useQueryClient();
+  const [searchParams] = useSearchParams();
+  const paymentResult = searchParams.get("payment");
 
   const { data: invoice } = useQuery({ queryKey: ["invoices", invoiceId], queryFn: () => getInvoice(invoiceId) });
+
+  const payMutation = useMutation({
+    mutationFn: () => createCheckoutSession(invoiceId),
+    onSuccess: (url) => {
+      window.location.href = url;
+    },
+  });
 
   const sendMutation = useMutation({
     mutationFn: () => sendInvoice(invoiceId),
@@ -37,6 +47,16 @@ export function InvoiceDetailPage() {
 
   return (
     <div>
+      {paymentResult === "success" && (
+        <div className="mb-4 rounded-md bg-green-50 px-3 py-2 text-sm text-green-700">
+          Payment received — thank you! It may take a moment to reflect below.
+        </div>
+      )}
+      {paymentResult === "cancelled" && (
+        <div className="mb-4 rounded-md bg-yellow-50 px-3 py-2 text-sm text-yellow-700">
+          Payment was cancelled. No charge was made.
+        </div>
+      )}
       <div className="mb-6 flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-gray-900">{invoice.invoiceNumber}</h1>
@@ -78,6 +98,16 @@ export function InvoiceDetailPage() {
               className="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50"
             >
               {sendMutation.isPending ? "Sending…" : "Send to Client"}
+            </button>
+          )}
+          {(invoice.status === "SENT" || invoice.status === "OVERDUE") && (
+            <button
+              type="button"
+              onClick={() => payMutation.mutate()}
+              disabled={payMutation.isPending}
+              className="rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50"
+            >
+              {payMutation.isPending ? "Redirecting…" : "Pay with Stripe"}
             </button>
           )}
         </div>
