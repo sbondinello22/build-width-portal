@@ -6,7 +6,7 @@ import { LoginPage } from "./pages/LoginPage";
 import { RegisterPage } from "./pages/RegisterPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { ClientsPage } from "./pages/ClientsPage";
-import { ProjectsPage } from "./pages/ProjectsPage";
+import { ClientDetailPage } from "./pages/ClientDetailPage";
 import { TimeTrackingPage } from "./pages/TimeTrackingPage";
 import { InvoicesPage } from "./pages/InvoicesPage";
 import { UsersPage } from "./pages/UsersPage";
@@ -23,7 +23,7 @@ function App() {
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/clients" element={<ClientsPage />} />
-          <Route path="/projects" element={<ProjectsPage />} />
+          <Route path="/clients/:id" element={<ClientDetailPage />} />
           <Route path="/time-tracking" element={<TimeTrackingPage />} />
           <Route path="/invoices" element={<InvoicesPage />} />
 
