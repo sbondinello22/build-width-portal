@@ -30,15 +30,18 @@ export function DashboardPage() {
       </div>
 
       <h2 className="mb-3 text-lg font-semibold text-gray-900">Recent Activity</h2>
-      <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
+      <div className="rounded-lg border border-gray-200 bg-white">
         {activity?.length === 0 ? (
           <p className="p-4 text-sm text-gray-400">No activity yet.</p>
         ) : (
           <ul>
             {activity?.map((entry) => (
-              <li key={entry.id} className="flex items-center justify-between border-b border-gray-100 px-4 py-3 text-sm last:border-0">
+              <li
+                key={entry.id}
+                className="flex flex-col gap-1 border-b border-gray-100 px-4 py-3 text-sm last:border-0 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
+              >
                 <span className="text-gray-900">{entry.message}</span>
-                <span className="text-gray-400">{new Date(entry.createdAt).toLocaleString()}</span>
+                <span className="shrink-0 text-gray-400">{new Date(entry.createdAt).toLocaleString()}</span>
               </li>
             ))}
           </ul>
