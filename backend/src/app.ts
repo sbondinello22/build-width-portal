@@ -7,6 +7,7 @@ import { authRouter } from "./modules/auth/auth.routes";
 import { clientsRouter } from "./modules/clients/clients.routes";
 import { projectsRouter } from "./modules/projects/projects.routes";
 import { timeEntriesRouter } from "./modules/time-entries/time-entries.routes";
+import { invoicesRouter } from "./modules/invoices/invoices.routes";
 
 export const app = express();
 
@@ -20,6 +21,7 @@ app.use("/api/auth", authRouter);
 app.use("/api/clients", clientsRouter);
 app.use("/api/projects", projectsRouter);
 app.use("/api/time-entries", timeEntriesRouter);
+app.use("/api/invoices", invoicesRouter);
 
 app.use((_req, res) => res.status(404).json({ error: "Not found" }));
 app.use(errorMiddleware);
