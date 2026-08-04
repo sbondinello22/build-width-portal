@@ -1,5 +1,6 @@
 import { prisma } from "../../config/prisma";
 import { ApiError } from "../../utils/apiError";
+import { logActivity } from "../../lib/activityLog";
 import { CreateClientInput, UpdateClientInput } from "./clients.schema";
 
 export function listClients() {
@@ -12,8 +13,16 @@ export async function getClient(id: string) {
   return client;
 }
 
-export function createClient(input: CreateClientInput, createdById: string) {
-  return prisma.client.create({ data: { ...input, createdById } });
+export async function createClient(input: CreateClientInput, createdById: string) {
+  const client = await prisma.client.create({ data: { ...input, createdById } });
+  await logActivity({
+    userId: createdById,
+    entityType: "client",
+    entityId: client.id,
+    action: "created",
+    message: `Client ${client.name} was added`,
+  });
+  return client;
 }
 
 export async function updateClient(id: string, input: UpdateClientInput) {

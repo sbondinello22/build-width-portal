@@ -2,6 +2,7 @@ import { prisma } from "../../config/prisma";
 import { ApiError } from "../../utils/apiError";
 import { sendMail } from "../../lib/email/mailer";
 import { generateInvoicePdfBuffer } from "../../lib/pdf/generateInvoicePdf";
+import { logActivity } from "../../lib/activityLog";
 import { GenerateInvoiceInput, UpdateStatusInput } from "./invoices.schema";
 
 const invoiceInclude = { client: true, lineItems: true, payments: true } as const;
@@ -105,7 +106,15 @@ export async function generateInvoice(input: GenerateInvoiceInput, createdById: 
     return invoice.id;
   });
 
-  return getInvoice(invoiceId);
+  const invoice = await getInvoice(invoiceId);
+  await logActivity({
+    userId: createdById,
+    entityType: "invoice",
+    entityId: invoice.id,
+    action: "generated",
+    message: `Invoice ${invoice.invoiceNumber} generated for ${client.name} ($${invoice.total})`,
+  });
+  return invoice;
 }
 
 export async function updateInvoiceStatus(id: string, input: UpdateStatusInput) {
@@ -130,5 +139,12 @@ export async function sendInvoice(id: string) {
     attachments: [{ filename: `${invoice.invoiceNumber}.pdf`, content: pdfBuffer }],
   });
 
-  return prisma.invoice.update({ where: { id }, data: { status: "SENT" }, include: invoiceInclude });
+  const updated = await prisma.invoice.update({ where: { id }, data: { status: "SENT" }, include: invoiceInclude });
+  await logActivity({
+    entityType: "invoice",
+    entityId: updated.id,
+    action: "sent",
+    message: `Invoice ${updated.invoiceNumber} was emailed to ${updated.client.email}`,
+  });
+  return updated;
 }

@@ -11,9 +11,11 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
-    const isAuthRoute = originalRequest?.url?.includes("/auth/");
+    const isNonRetryableAuthRoute = ["/auth/login", "/auth/register", "/auth/refresh", "/auth/logout"].some(
+      (path) => originalRequest?.url?.includes(path)
+    );
 
-    if (error.response?.status === 401 && !originalRequest._retry && !isAuthRoute) {
+    if (error.response?.status === 401 && !originalRequest._retry && !isNonRetryableAuthRoute) {
       originalRequest._retry = true;
       try {
         refreshPromise ??= api.post("/auth/refresh").finally(() => {
