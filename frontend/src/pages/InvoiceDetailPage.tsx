@@ -7,6 +7,14 @@ import { createCheckoutSession } from "../api/payments";
 
 const editableStatuses: InvoiceStatus[] = ["DRAFT", "SENT", "OVERDUE", "VOID"];
 
+const statusBadgeStyles: Record<InvoiceStatus, string> = {
+  DRAFT: "bg-gray-100 text-gray-700",
+  SENT: "bg-blue-100 text-blue-800",
+  PAID: "bg-green-100 text-green-800",
+  OVERDUE: "bg-red-100 text-red-800",
+  VOID: "bg-gray-100 text-gray-400",
+};
+
 export function InvoiceDetailPage() {
   const { id } = useParams<{ id: string }>();
   const invoiceId = id!;
@@ -65,22 +73,22 @@ export function InvoiceDetailPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          {isAdmin ? (
+          {isAdmin && invoice.status !== "PAID" ? (
             <select
               value={invoice.status}
               onChange={(e) => statusMutation.mutate(e.target.value as InvoiceStatus)}
-              disabled={invoice.status === "PAID"}
-              className="rounded-md border border-gray-300 px-3 py-2 text-sm disabled:opacity-50"
+              className="rounded-md border border-gray-300 px-3 py-2 text-sm"
             >
               {editableStatuses.map((s) => (
                 <option key={s} value={s}>
                   {s}
                 </option>
               ))}
-              {invoice.status === "PAID" && <option value="PAID">PAID</option>}
             </select>
           ) : (
-            <span className="rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-700">{invoice.status}</span>
+            <span className={`rounded-full px-3 py-1 text-sm font-medium ${statusBadgeStyles[invoice.status]}`}>
+              {invoice.status}
+            </span>
           )}
           <a
             href={invoicePdfUrl(invoiceId)}
