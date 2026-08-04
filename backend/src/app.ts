@@ -1,0 +1,19 @@
+import express from "express";
+import cors from "cors";
+import cookieParser from "cookie-parser";
+import { env } from "./config/env";
+import { errorMiddleware } from "./middleware/error.middleware";
+import { authRouter } from "./modules/auth/auth.routes";
+
+export const app = express();
+
+app.use(cors({ origin: env.CORS_ORIGIN, credentials: true }));
+app.use(cookieParser());
+app.use(express.json());
+
+app.get("/api/health", (_req, res) => res.json({ ok: true }));
+
+app.use("/api/auth", authRouter);
+
+app.use((_req, res) => res.status(404).json({ error: "Not found" }));
+app.use(errorMiddleware);
