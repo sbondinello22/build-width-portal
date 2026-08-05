@@ -143,13 +143,18 @@ export function InvoicesPage() {
   years.sort((a, b) => b - a);
 
   const monthlyData = monthNames.map((label, i) => {
-    const total = clientFilteredInvoices
-      .filter((inv) => {
-        const d = new Date(inv.issueDate);
-        return d.getFullYear() === year && d.getMonth() === i;
-      })
+    const monthInvoices = clientFilteredInvoices.filter((inv) => {
+      if (inv.status === "VOID") return false;
+      const d = new Date(inv.issueDate);
+      return d.getFullYear() === year && d.getMonth() === i;
+    });
+    const paid = monthInvoices
+      .filter((inv) => inv.status === "PAID")
       .reduce((sum, inv) => sum + Number(inv.total), 0);
-    return { label, values: { total: Math.round(total * 100) / 100 } };
+    const open = monthInvoices
+      .filter((inv) => inv.status !== "PAID")
+      .reduce((sum, inv) => sum + Number(inv.total), 0);
+    return { label, values: { paid: Math.round(paid * 100) / 100, open: Math.round(open * 100) / 100 } };
   });
 
   const tabs: { key: StatusTab; label: string }[] = [
@@ -189,7 +194,7 @@ export function InvoicesPage() {
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <div>
             <h2 className="text-lg font-semibold text-gray-900">Invoice History</h2>
-            <p className="text-sm text-gray-500">Total invoiced per month, full calendar year.</p>
+            <p className="text-sm text-gray-500">Paid vs. open invoice totals per month (voided invoices excluded).</p>
           </div>
           <select
             value={year}
@@ -205,7 +210,10 @@ export function InvoicesPage() {
         </div>
         <BarChart
           data={monthlyData}
-          series={[{ key: "total", label: "Invoiced", color: "#2a78d6" }]}
+          series={[
+            { key: "paid", label: "Paid", color: "#0ca30c" },
+            { key: "open", label: "Open", color: "#2a78d6" },
+          ]}
           valueFormatter={(n) => `$${n.toLocaleString()}`}
         />
       </div>
