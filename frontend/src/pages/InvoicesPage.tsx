@@ -8,7 +8,7 @@ import { listTimeEntriesForProject } from "../api/timeEntries";
 import { generateInvoice, listInvoices } from "../api/invoices";
 import { Modal } from "../components/ui/Modal";
 import { SearchJump } from "../components/ui/SearchJump";
-import { BarChart } from "../components/charts/BarChart";
+import { LineChart } from "../components/charts/LineChart";
 import { InvoicesSubNav } from "../components/layout/InvoicesSubNav";
 import { statusStyles, openStatuses, closedStatuses, monthNames } from "../lib/invoiceDisplay";
 
@@ -219,7 +219,7 @@ export function InvoicesPage() {
         </div>
         <div className="flex flex-col gap-6 lg:flex-row">
           <div className="min-w-0 flex-1">
-            <BarChart
+            <LineChart
               data={monthlyData}
               series={[
                 { key: "paid", label: "Paid", color: "#0ca30c" },
@@ -227,6 +227,7 @@ export function InvoicesPage() {
                 { key: "draft", label: "Draft", color: "var(--text-muted)" },
               ]}
               valueFormatter={(n) => `$${n.toLocaleString()}`}
+              axisLabel="Amount ($)"
             />
           </div>
           <div className="flex shrink-0 flex-row gap-3 lg:w-48 lg:flex-col">
