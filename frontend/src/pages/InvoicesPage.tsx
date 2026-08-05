@@ -140,14 +140,25 @@ export function InvoicesPage() {
     const paid = monthInvoices
       .filter((inv) => inv.status === "PAID")
       .reduce((sum, inv) => sum + Number(inv.total), 0);
-    const open = monthInvoices
-      .filter((inv) => inv.status !== "PAID")
+    const draft = monthInvoices
+      .filter((inv) => inv.status === "DRAFT")
       .reduce((sum, inv) => sum + Number(inv.total), 0);
-    return { label, values: { paid: Math.round(paid * 100) / 100, open: Math.round(open * 100) / 100 } };
+    const open = monthInvoices
+      .filter((inv) => inv.status !== "PAID" && inv.status !== "DRAFT")
+      .reduce((sum, inv) => sum + Number(inv.total), 0);
+    return {
+      label,
+      values: {
+        paid: Math.round(paid * 100) / 100,
+        open: Math.round(open * 100) / 100,
+        draft: Math.round(draft * 100) / 100,
+      },
+    };
   });
 
   const totalPaid = monthlyData.reduce((sum, m) => sum + m.values.paid, 0);
   const totalOpen = monthlyData.reduce((sum, m) => sum + m.values.open, 0);
+  const totalDraft = monthlyData.reduce((sum, m) => sum + m.values.draft, 0);
 
   function formatCurrency(n: number) {
     return `$${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -213,6 +224,7 @@ export function InvoicesPage() {
               series={[
                 { key: "paid", label: "Paid", color: "#0ca30c" },
                 { key: "open", label: "Open", color: "var(--brand-blue)" },
+                { key: "draft", label: "Draft", color: "var(--text-muted)" },
               ]}
               valueFormatter={(n) => `$${n.toLocaleString()}`}
             />
@@ -232,6 +244,16 @@ export function InvoicesPage() {
               </div>
               <div className="mt-1 text-xl font-bold text-[var(--text-primary)]">{formatCurrency(totalOpen)}</div>
             </div>
+            <Link
+              to="/invoices/draft"
+              className="flex-1 rounded-lg border border-[var(--border)] bg-[var(--surface-2)] p-4 hover:bg-[var(--surface)]"
+            >
+              <div className="flex items-center gap-1.5 text-sm text-[var(--text-secondary)]">
+                <span className="inline-block h-2.5 w-2.5 rounded-sm" style={{ backgroundColor: "var(--text-muted)" }} />
+                Draft
+              </div>
+              <div className="mt-1 text-xl font-bold text-[var(--text-primary)]">{formatCurrency(totalDraft)}</div>
+            </Link>
           </div>
         </div>
       </div>
