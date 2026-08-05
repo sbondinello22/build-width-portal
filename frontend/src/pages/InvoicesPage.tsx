@@ -352,7 +352,7 @@ export function InvoicesPage() {
               series={[
                 { key: "paid", label: "Paid", color: "#0ca30c" },
                 { key: "open", label: "Open", color: "var(--brand-blue)" },
-                { key: "draft", label: "Draft", color: "var(--text-muted)" },
+                { key: "draft", label: "Drafts", color: "var(--text-muted)" },
               ]}
               valueFormatter={(n) => `$${n.toLocaleString()}`}
               axisLabel="Amount ($)"
@@ -379,7 +379,7 @@ export function InvoicesPage() {
             >
               <div className="flex items-center gap-1.5 text-sm text-[var(--text-secondary)]">
                 <span className="inline-block h-2.5 w-2.5 rounded-sm" style={{ backgroundColor: "var(--text-muted)" }} />
-                Draft
+                Drafts
               </div>
               <div className="mt-1 text-xl font-bold text-[var(--text-primary)]">{formatCurrency(totalDraft)}</div>
             </Link>

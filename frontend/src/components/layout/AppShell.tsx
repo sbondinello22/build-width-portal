@@ -87,6 +87,11 @@ export function AppShell() {
               Users
             </NavLink>
           )}
+          {user?.role === "ADMIN" && (
+            <NavLink to="/schedule" className={navLinkClass}>
+              Schedule
+            </NavLink>
+          )}
           <NavLink to="/settings" className={navLinkClass}>
             Settings
           </NavLink>
@@ -114,6 +119,11 @@ export function AppShell() {
             {user?.role === "ADMIN" && (
               <NavLink to="/users" className={mobileNavLinkClass} onClick={() => setMobileOpen(false)}>
                 Users
+              </NavLink>
+            )}
+            {user?.role === "ADMIN" && (
+              <NavLink to="/schedule" className={mobileNavLinkClass} onClick={() => setMobileOpen(false)}>
+                Schedule
               </NavLink>
             )}
             <NavLink to="/settings" className={mobileNavLinkClass} onClick={() => setMobileOpen(false)}>

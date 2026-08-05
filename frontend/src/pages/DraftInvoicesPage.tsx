@@ -86,7 +86,7 @@ export function DraftInvoicesPage() {
           <p className="text-sm text-[var(--text-secondary)]">Invoices that haven't been sent to the client yet.</p>
         </div>
         <div className="rounded-lg border border-[var(--border)] bg-[var(--surface-2)] px-4 py-2 text-right">
-          <div className="text-xs text-[var(--text-muted)]">Total Draft</div>
+          <div className="text-xs text-[var(--text-muted)]">Total Drafts</div>
           <div className="text-lg font-bold text-[var(--text-primary)]">{formatCurrency(totalDraft)}</div>
         </div>
       </div>

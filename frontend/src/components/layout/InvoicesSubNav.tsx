@@ -15,7 +15,7 @@ export function InvoicesSubNav() {
         Overview
       </NavLink>
       <NavLink to="/invoices/draft" className={linkClass}>
-        Draft
+        Drafts
       </NavLink>
       <NavLink to="/invoices/overdue" className={linkClass}>
         Overdue

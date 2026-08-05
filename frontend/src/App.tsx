@@ -16,6 +16,7 @@ import { RecurringInvoicesPage } from "./pages/RecurringInvoicesPage";
 import { InvoiceConfigPage } from "./pages/InvoiceConfigPage";
 import { AnalyticsPage } from "./pages/AnalyticsPage";
 import { UsersPage } from "./pages/UsersPage";
+import { SchedulePage } from "./pages/SchedulePage";
 import { SettingsPage } from "./pages/SettingsPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
 
@@ -43,6 +44,7 @@ function App() {
             <Route path="/invoices/configure" element={<InvoiceConfigPage />} />
             <Route path="/analytics" element={<AnalyticsPage />} />
             <Route path="/users" element={<UsersPage />} />
+            <Route path="/schedule" element={<SchedulePage />} />
           </Route>
         </Route>
       </Route>

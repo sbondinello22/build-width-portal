@@ -28,6 +28,7 @@ const envSchema = z.object({
   SMTP_FROM: z.string().optional().default("Employee Portal <billing@example.com>"),
 
   CRON_OVERDUE_SCHEDULE: z.string().default("0 8 * * *"),
+  CRON_SCHEDULE_REMINDER: z.string().default("*/5 * * * *"),
 
   BOOTSTRAP_ADMIN_EMAIL: z.string().optional().default(""),
   BOOTSTRAP_ADMIN_PASSWORD: z.string().optional().default(""),
