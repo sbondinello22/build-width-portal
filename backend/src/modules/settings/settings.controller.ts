@@ -10,3 +10,7 @@ export async function updateHandler(req: Request, res: Response) {
   const settings = await settingsService.updateSettings(req.body);
   res.json({ settings });
 }
+
+export function paymentsStatusHandler(_req: Request, res: Response) {
+  res.json(settingsService.getPaymentsStatus());
+}

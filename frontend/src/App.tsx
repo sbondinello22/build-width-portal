@@ -16,6 +16,7 @@ import { RecurringInvoicesPage } from "./pages/RecurringInvoicesPage";
 import { InvoiceConfigPage } from "./pages/InvoiceConfigPage";
 import { AnalyticsPage } from "./pages/AnalyticsPage";
 import { UsersPage } from "./pages/UsersPage";
+import { SettingsPage } from "./pages/SettingsPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
 
 function App() {
@@ -36,6 +37,7 @@ function App() {
           <Route path="/invoices/overdue" element={<OverdueInvoicesPage />} />
           <Route path="/invoices/recurring" element={<RecurringInvoicesPage />} />
           <Route path="/invoices/:id" element={<InvoiceDetailPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
 
           <Route element={<RoleGuard allow={["ADMIN"]} />}>
             <Route path="/invoices/configure" element={<InvoiceConfigPage />} />

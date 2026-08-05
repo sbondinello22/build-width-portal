@@ -7,7 +7,7 @@ import {
   signRefreshToken,
   verifyRefreshToken,
 } from "../../lib/jwt";
-import { LoginInput, RegisterInput } from "./auth.schema";
+import { LoginInput, RegisterInput, UpdateMeInput } from "./auth.schema";
 
 async function issueTokenPair(userId: string, role: import("@prisma/client").Role) {
   const accessToken = signAccessToken(userId, role);
@@ -98,4 +98,30 @@ export async function logout(refreshCookie: string | undefined) {
 
 export async function getUserById(userId: string) {
   return prisma.user.findUnique({ where: { id: userId } });
+}
+
+export async function updateMe(userId: string, input: UpdateMeInput) {
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) throw new ApiError(404, "User not found");
+
+  if (input.email && input.email !== user.email) {
+    const existing = await prisma.user.findUnique({ where: { email: input.email } });
+    if (existing) throw new ApiError(409, "An account with this email already exists");
+  }
+
+  let passwordHash: string | undefined;
+  if (input.newPassword) {
+    const valid = await comparePassword(input.currentPassword!, user.passwordHash);
+    if (!valid) throw new ApiError(401, "Current password is incorrect");
+    passwordHash = await hashPassword(input.newPassword);
+  }
+
+  return prisma.user.update({
+    where: { id: userId },
+    data: {
+      name: input.name ?? undefined,
+      email: input.email ?? undefined,
+      passwordHash,
+    },
+  });
 }

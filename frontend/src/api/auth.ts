@@ -27,3 +27,13 @@ export async function meRequest() {
   const { data } = await api.get<{ user: User }>("/auth/me");
   return data.user;
 }
+
+export async function updateMeRequest(input: {
+  name?: string;
+  email?: string;
+  currentPassword?: string;
+  newPassword?: string;
+}) {
+  const { data } = await api.patch<{ user: User }>("/auth/me", input);
+  return data.user;
+}

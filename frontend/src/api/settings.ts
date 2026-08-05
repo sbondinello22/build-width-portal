@@ -25,3 +25,14 @@ export async function updateSettings(input: UpdateSettingsInput) {
   const { data } = await api.patch<{ settings: AppSettings }>("/settings", input);
   return data.settings;
 }
+
+export interface PaymentsStatus {
+  stripeConfigured: boolean;
+  stripeMode: "live" | "test" | null;
+  paypalConfigured: boolean;
+}
+
+export async function getPaymentsStatus() {
+  const { data } = await api.get<PaymentsStatus>("/settings/payments-status");
+  return data;
+}

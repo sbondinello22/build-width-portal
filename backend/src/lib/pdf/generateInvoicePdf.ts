@@ -3,7 +3,7 @@ import type { Client, Invoice, InvoiceLineItem } from "@prisma/client";
 
 type InvoiceWithRelations = Invoice & { client: Client; lineItems: InvoiceLineItem[] };
 
-export function generateInvoicePdfBuffer(invoice: InvoiceWithRelations): Promise<Buffer> {
+export function generateInvoicePdfBuffer(invoice: InvoiceWithRelations, paymentUrl?: string): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     const doc = new PDFDocument({ margin: 50 });
     const chunks: Buffer[] = [];
@@ -51,6 +51,15 @@ export function generateInvoicePdfBuffer(invoice: InvoiceWithRelations): Promise
     doc
       .font("Helvetica-Bold")
       .text(`Total: $${Number(invoice.total).toFixed(2)}`, 370, y, { width: 170, align: "right" });
+
+    if (paymentUrl) {
+      y += 40;
+      doc
+        .font("Helvetica-Bold")
+        .fillColor("#2a78d6")
+        .text("Pay this invoice online", 50, y, { link: paymentUrl, underline: true });
+      doc.fillColor("black").font("Helvetica");
+    }
 
     doc.end();
   });

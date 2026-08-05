@@ -4,6 +4,7 @@ import { sendMail } from "../../lib/email/mailer";
 import { generateInvoicePdfBuffer } from "../../lib/pdf/generateInvoicePdf";
 import { logActivity } from "../../lib/activityLog";
 import { getSettings } from "../settings/settings.service";
+import { createCheckoutSession } from "../payments/payments.service";
 import { GenerateInvoiceInput, UpdateInvoiceInput, UpdateStatusInput } from "./invoices.schema";
 
 const invoiceInclude = { client: true, lineItems: true, payments: true } as const;
@@ -197,11 +198,24 @@ export async function sendInvoice(id: string) {
     throw new ApiError(409, `Cannot send an invoice with status ${invoice.status}`);
   }
 
-  const pdfBuffer = await generateInvoicePdfBuffer(invoice);
+  let paymentUrl: string | undefined;
+  try {
+    const session = await createCheckoutSession(id);
+    paymentUrl = session.url ?? undefined;
+  } catch {
+    paymentUrl = undefined;
+  }
+
+  const pdfBuffer = await generateInvoicePdfBuffer(invoice, paymentUrl);
   await sendMail({
     to: invoice.client.email,
     subject: `Invoice ${invoice.invoiceNumber}`,
-    text: `Please find attached invoice ${invoice.invoiceNumber} for $${Number(invoice.total).toFixed(2)}, due ${invoice.dueDate.toDateString()}.`,
+    text: [
+      `Please find attached invoice ${invoice.invoiceNumber} for $${Number(invoice.total).toFixed(2)}, due ${invoice.dueDate.toDateString()}.`,
+      paymentUrl ? `Pay online: ${paymentUrl}` : null,
+    ]
+      .filter(Boolean)
+      .join("\n\n"),
     attachments: [{ filename: `${invoice.invoiceNumber}.pdf`, content: pdfBuffer }],
   });
 

@@ -11,3 +11,4 @@ settingsRouter.use(requireAuth, requireRole("ADMIN"));
 
 settingsRouter.get("/", asyncHandler(controller.getHandler));
 settingsRouter.patch("/", validateBody(updateSettingsSchema), asyncHandler(controller.updateHandler));
+settingsRouter.get("/payments-status", controller.paymentsStatusHandler);

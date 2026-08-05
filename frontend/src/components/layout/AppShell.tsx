@@ -87,6 +87,9 @@ export function AppShell() {
               Users
             </NavLink>
           )}
+          <NavLink to="/settings" className={navLinkClass}>
+            Settings
+          </NavLink>
         </nav>
 
         {mobileOpen && (
@@ -113,6 +116,9 @@ export function AppShell() {
                 Users
               </NavLink>
             )}
+            <NavLink to="/settings" className={mobileNavLinkClass} onClick={() => setMobileOpen(false)}>
+              Settings
+            </NavLink>
             <div className="mt-3 border-t border-[var(--border-subtle)] pt-3">
               <div className="px-3 text-sm font-medium text-[var(--text-primary)]">{user?.name}</div>
               <div className="px-3 text-sm text-[var(--text-secondary)]">{user?.role}</div>

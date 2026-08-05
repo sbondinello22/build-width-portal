@@ -18,6 +18,9 @@ const envSchema = z.object({
   STRIPE_SECRET_KEY: z.string().optional().default(""),
   STRIPE_WEBHOOK_SECRET: z.string().optional().default(""),
 
+  PAYPAL_CLIENT_ID: z.string().optional().default(""),
+  PAYPAL_CLIENT_SECRET: z.string().optional().default(""),
+
   SMTP_HOST: z.string().optional().default(""),
   SMTP_PORT: z.coerce.number().optional().default(587),
   SMTP_USER: z.string().optional().default(""),

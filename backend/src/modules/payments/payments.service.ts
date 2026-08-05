@@ -7,8 +7,8 @@ import { env } from "../../config/env";
 export async function createCheckoutSession(invoiceId: string) {
   const invoice = await prisma.invoice.findUnique({ where: { id: invoiceId } });
   if (!invoice) throw new ApiError(404, "Invoice not found");
-  if (invoice.status !== "SENT" && invoice.status !== "OVERDUE") {
-    throw new ApiError(409, "Only sent or overdue invoices can be paid");
+  if (invoice.status === "PAID" || invoice.status === "VOID") {
+    throw new ApiError(409, `Invoice with status ${invoice.status} cannot be paid`);
   }
 
   const amountDue = Number(invoice.total) - Number(invoice.amountPaid);

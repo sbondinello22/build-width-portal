@@ -38,3 +38,8 @@ export async function meHandler(req: Request, res: Response) {
   }
   res.json({ user: toPublicUser(user) });
 }
+
+export async function updateMeHandler(req: Request, res: Response) {
+  const user = await authService.updateMe(req.user!.id, req.body);
+  res.json({ user: toPublicUser(user) });
+}
