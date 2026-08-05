@@ -56,17 +56,33 @@ export function LineChart({
   function pointX(i: number) {
     return data.length === 1 ? leftPad + plotWidth / 2 : leftPad + i * colSlot;
   }
-  function pointY(value: number) {
-    return axisY - (value / max) * (chartHeight - 12);
+  function seriesOffset(si: number) {
+    return series.length > 1 ? (si - (series.length - 1) / 2) * 4 : 0;
   }
+  function pointY(value: number, si: number) {
+    return axisY - (value / max) * (chartHeight - 12) + seriesOffset(si);
+  }
+
+  const DASH_PATTERNS = ["none", "6 4", "1.5 3.5", "9 3 2 3"];
 
   return (
     <div className="w-full">
       {series.length > 1 && (
         <div className="mb-3 flex items-center gap-4 text-xs text-[var(--text-secondary)]">
-          {series.map((s) => (
+          {series.map((s, si) => (
             <div key={s.key} className="flex items-center gap-1.5">
-              <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ backgroundColor: s.color }} />
+              <svg width={18} height={8} className="shrink-0">
+                <line
+                  x1={0}
+                  y1={4}
+                  x2={18}
+                  y2={4}
+                  stroke={s.color}
+                  strokeWidth={2}
+                  strokeDasharray={DASH_PATTERNS[si % DASH_PATTERNS.length] === "none" ? undefined : DASH_PATTERNS[si % DASH_PATTERNS.length]}
+                  strokeLinecap="round"
+                />
+              </svg>
               {s.label}
             </div>
           ))}
@@ -101,9 +117,21 @@ export function LineChart({
           )}
           <line x1={leftPad} y1={axisY} x2={width} y2={axisY} stroke="var(--chart-axis)" strokeWidth={1} />
 
-          {series.map((s) => {
-            const points = data.map((d, i) => `${pointX(i)},${pointY(d.values[s.key] ?? 0)}`).join(" ");
-            return <polyline key={s.key} points={points} fill="none" stroke={s.color} strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />;
+          {series.map((s, si) => {
+            const points = data.map((d, i) => `${pointX(i)},${pointY(d.values[s.key] ?? 0, si)}`).join(" ");
+            const dash = DASH_PATTERNS[si % DASH_PATTERNS.length];
+            return (
+              <polyline
+                key={s.key}
+                points={points}
+                fill="none"
+                stroke={s.color}
+                strokeWidth={2}
+                strokeDasharray={dash === "none" ? undefined : dash}
+                strokeLinejoin="round"
+                strokeLinecap="round"
+              />
+            );
           })}
 
           {data.map((d, i) => {
@@ -116,12 +144,11 @@ export function LineChart({
               <g key={d.label} onMouseEnter={() => setHover(i)} onMouseLeave={() => setHover(null)} style={{ cursor: "default" }}>
                 <rect x={x - colSlot / 2} y={0} width={colSlot} height={axisY} fill="transparent" />
                 {series.map((s, si) => {
-                  const y = pointY(d.values[s.key] ?? 0);
-                  const dotOffset = series.length > 1 ? (si - (series.length - 1) / 2) * 5 : 0;
+                  const y = pointY(d.values[s.key] ?? 0, si);
                   return (
                     <circle
                       key={s.key}
-                      cx={x + dotOffset}
+                      cx={x}
                       cy={y}
                       r={isHover ? 4.5 : 3}
                       fill={s.color}
