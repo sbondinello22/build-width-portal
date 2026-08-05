@@ -55,6 +55,15 @@ export async function duplicateInvoice(id: string) {
   return data.invoice;
 }
 
+export async function updateInvoice(id: string, input: { dueDate?: string; tax?: number; notes?: string }) {
+  const { data } = await api.patch<{ invoice: Invoice }>(`/invoices/${id}`, input);
+  return data.invoice;
+}
+
+export async function deleteInvoice(id: string) {
+  await api.delete(`/invoices/${id}`);
+}
+
 export function invoicePdfUrl(id: string) {
   return `${api.defaults.baseURL}/invoices/${id}/pdf`;
 }

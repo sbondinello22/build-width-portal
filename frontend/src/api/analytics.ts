@@ -7,6 +7,8 @@ export interface HoursSeriesPoint {
   hours: number;
   billableHours: number;
   nonBillableHours: number;
+  billableAmount: number;
+  nonBillableAmount: number;
 }
 
 export interface ProjectAnalytics {

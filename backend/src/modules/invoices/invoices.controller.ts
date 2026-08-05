@@ -39,3 +39,13 @@ export async function duplicateHandler(req: Request, res: Response) {
   const invoice = await invoicesService.duplicateInvoice(req.params.id, req.user!.id);
   res.status(201).json({ invoice });
 }
+
+export async function updateHandler(req: Request, res: Response) {
+  const invoice = await invoicesService.updateInvoice(req.params.id, req.body);
+  res.json({ invoice });
+}
+
+export async function deleteHandler(req: Request, res: Response) {
+  await invoicesService.deleteInvoice(req.params.id);
+  res.status(204).send();
+}

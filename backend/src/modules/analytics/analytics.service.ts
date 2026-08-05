@@ -41,17 +41,28 @@ export async function getHoursTimeSeries(params: TimeSeriesParams) {
 
   const entries = await prisma.timeEntry.findMany({
     where,
-    select: { startedAt: true, durationMinutes: true, billable: true },
+    select: { startedAt: true, durationMinutes: true, billable: true, project: { select: { rate: true } } },
   });
 
-  const buckets = new Map<string, { hours: number; billableHours: number; nonBillableHours: number }>();
+  const buckets = new Map<
+    string,
+    { hours: number; billableHours: number; nonBillableHours: number; billableAmount: number; nonBillableAmount: number }
+  >();
   for (const entry of entries) {
     const periodStart = truncateToPeriod(entry.startedAt, params.groupBy).toISOString();
     const hours = (entry.durationMinutes ?? 0) / 60;
-    const bucket = buckets.get(periodStart) ?? { hours: 0, billableHours: 0, nonBillableHours: 0 };
+    const rate = Number(entry.project.rate);
+    const amount = hours * rate;
+    const bucket =
+      buckets.get(periodStart) ?? { hours: 0, billableHours: 0, nonBillableHours: 0, billableAmount: 0, nonBillableAmount: 0 };
     bucket.hours += hours;
-    if (entry.billable) bucket.billableHours += hours;
-    else bucket.nonBillableHours += hours;
+    if (entry.billable) {
+      bucket.billableHours += hours;
+      bucket.billableAmount += amount;
+    } else {
+      bucket.nonBillableHours += hours;
+      bucket.nonBillableAmount += amount;
+    }
     buckets.set(periodStart, bucket);
   }
 
@@ -61,6 +72,8 @@ export async function getHoursTimeSeries(params: TimeSeriesParams) {
       hours: Math.round(b.hours * 100) / 100,
       billableHours: Math.round(b.billableHours * 100) / 100,
       nonBillableHours: Math.round(b.nonBillableHours * 100) / 100,
+      billableAmount: Math.round(b.billableAmount * 100) / 100,
+      nonBillableAmount: Math.round(b.nonBillableAmount * 100) / 100,
     }))
     .sort((a, b) => a.periodStart.localeCompare(b.periodStart));
 }

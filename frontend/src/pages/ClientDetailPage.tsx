@@ -1,11 +1,11 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "../context/AuthContext";
-import { deleteClient, getClient, updateClient } from "../api/clients";
-import { createProjectForClient, listProjectsForClient, updateProject } from "../api/projects";
-import type { ProjectStatus } from "../api/projects";
+import { getClient } from "../api/clients";
+import { createProjectForClient, deleteProject, listProjectsForClient, updateProject } from "../api/projects";
+import type { Project, ProjectStatus } from "../api/projects";
 import { Modal } from "../components/ui/Modal";
 import { FormField } from "../components/ui/FormField";
 
@@ -16,18 +16,86 @@ const statusStyles: Record<ProjectStatus, string> = {
   ARCHIVED: "bg-[var(--surface-2)] text-[var(--text-secondary)]",
 };
 
+function ProjectForm({
+  title,
+  initialName,
+  initialTotal,
+  initialHours,
+  submitLabel,
+  pending,
+  onClose,
+  onSubmit,
+}: {
+  title: string;
+  initialName: string;
+  initialTotal: string;
+  initialHours: string;
+  submitLabel: string;
+  pending: boolean;
+  onClose: () => void;
+  onSubmit: (input: { name: string; rate: number; budgetHours: number }) => void;
+}) {
+  const [name, setName] = useState(initialName);
+  const [total, setTotal] = useState(initialTotal);
+  const [hours, setHours] = useState(initialHours);
+
+  const computedRate = total && hours && Number(hours) > 0 ? Number(total) / Number(hours) : null;
+
+  return (
+    <Modal title={title} onClose={onClose}>
+      <form
+        onSubmit={(e: FormEvent) => {
+          e.preventDefault();
+          if (computedRate === null) return;
+          onSubmit({ name, rate: Math.round(computedRate * 100) / 100, budgetHours: Number(hours) });
+        }}
+      >
+        <FormField label="Name" required value={name} onChange={(e) => setName(e.target.value)} />
+        <FormField
+          label="Total Budget ($)"
+          type="number"
+          min="0"
+          step="0.01"
+          required
+          value={total}
+          onChange={(e) => setTotal(e.target.value)}
+        />
+        <FormField
+          label="Budget Hours"
+          type="number"
+          min="0"
+          step="any"
+          required
+          value={hours}
+          onChange={(e) => setHours(e.target.value)}
+        />
+        <div className="mb-3 rounded-md bg-[var(--surface-2)] px-3 py-2 text-sm text-[var(--text-secondary)]">
+          Effective hourly rate:{" "}
+          <span className="font-semibold text-[var(--text-primary)]">
+            {computedRate !== null ? `$${computedRate.toFixed(2)}/hr` : "—"}
+          </span>
+        </div>
+        <button
+          type="submit"
+          disabled={pending || computedRate === null}
+          className="mt-2 w-full rounded-md bg-[var(--brand-blue)] px-3 py-2 text-sm font-medium text-white hover:bg-[var(--brand-blue-dark)] disabled:opacity-50"
+        >
+          {submitLabel}
+        </button>
+      </form>
+    </Modal>
+  );
+}
+
 export function ClientDetailPage() {
   const { id } = useParams<{ id: string }>();
   const clientId = id!;
   const { user } = useAuth();
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const isAdmin = user?.role === "ADMIN";
 
-  const [showEditClient, setShowEditClient] = useState(false);
   const [showNewProject, setShowNewProject] = useState(false);
-  const [newProjectTotal, setNewProjectTotal] = useState("");
-  const [newProjectHours, setNewProjectHours] = useState("");
+  const [editingProject, setEditingProject] = useState<Project | null>(null);
 
   const { data: client } = useQuery({ queryKey: ["clients", clientId], queryFn: () => getClient(clientId) });
   const { data: projects } = useQuery({
@@ -35,44 +103,35 @@ export function ClientDetailPage() {
     queryFn: () => listProjectsForClient(clientId),
   });
 
-  const updateClientMutation = useMutation({
-    mutationFn: (input: { name: string; email: string; company?: string; hourlyRate: number }) =>
-      updateClient(clientId, input),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["clients", clientId] });
-      queryClient.invalidateQueries({ queryKey: ["clients"] });
-      setShowEditClient(false);
-    },
-  });
-
-  const deleteClientMutation = useMutation({
-    mutationFn: () => deleteClient(clientId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["clients"] });
-      navigate("/clients");
-    },
-  });
+  const invalidateProjects = () => queryClient.invalidateQueries({ queryKey: ["clients", clientId, "projects"] });
 
   const createProjectMutation = useMutation({
-    mutationFn: (input: { name: string; rate: number; budgetHours?: number }) =>
+    mutationFn: (input: { name: string; rate: number; budgetHours: number }) =>
       createProjectForClient(clientId, input),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["clients", clientId, "projects"] });
+      invalidateProjects();
       setShowNewProject(false);
-      setNewProjectTotal("");
-      setNewProjectHours("");
     },
   });
 
-  const computedRate =
-    newProjectTotal && newProjectHours && Number(newProjectHours) > 0
-      ? Number(newProjectTotal) / Number(newProjectHours)
-      : null;
+  const editProjectMutation = useMutation({
+    mutationFn: (input: { name: string; rate: number; budgetHours: number }) =>
+      updateProject(editingProject!.id, input),
+    onSuccess: () => {
+      invalidateProjects();
+      setEditingProject(null);
+    },
+  });
+
+  const deleteProjectMutation = useMutation({
+    mutationFn: (projectId: string) => deleteProject(projectId),
+    onSuccess: () => invalidateProjects(),
+  });
 
   const projectStatusMutation = useMutation({
     mutationFn: ({ projectId, status }: { projectId: string; status: ProjectStatus }) =>
       updateProject(projectId, { status }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["clients", clientId, "projects"] }),
+    onSuccess: () => invalidateProjects(),
   });
 
   if (!client) {
@@ -81,36 +140,12 @@ export function ClientDetailPage() {
 
   return (
     <div>
-      <div className="mb-6 flex items-start justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold text-[var(--text-primary)]">{client.name}</h1>
-          <p className="text-[var(--text-secondary)]">
-            {client.company ? `${client.company} · ` : ""}
-            {client.email} · ${client.hourlyRate}/hr default rate
-          </p>
-        </div>
-        {isAdmin && (
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => setShowEditClient(true)}
-              className="rounded-md border border-[var(--border)] px-3 py-2 text-sm font-medium text-[var(--text-secondary)] hover:bg-[var(--surface-2)]"
-            >
-              Edit
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                if (confirm(`Delete client "${client.name}"? This cannot be undone.`)) {
-                  deleteClientMutation.mutate();
-                }
-              }}
-              className="rounded-md border border-[var(--danger-border)] px-3 py-2 text-sm font-medium text-red-500 hover:bg-[var(--danger-hover-bg)]"
-            >
-              Delete
-            </button>
-          </div>
-        )}
+      <div className="mb-6">
+        <h1 className="text-2xl font-semibold text-[var(--text-primary)]">{client.name}</h1>
+        <p className="text-[var(--text-secondary)]">
+          {client.company ? `${client.company} · ` : ""}
+          {client.email} · ${client.hourlyRate}/hr default rate
+        </p>
       </div>
 
       <div className="mb-4 flex items-center justify-between">
@@ -134,6 +169,7 @@ export function ClientDetailPage() {
               <th className="px-4 py-3 font-medium">Rate</th>
               <th className="px-4 py-3 font-medium">Budget (hrs)</th>
               <th className="px-4 py-3 font-medium">Status</th>
+              {isAdmin && <th className="px-4 py-3 font-medium"></th>}
             </tr>
           </thead>
           <tbody>
@@ -162,11 +198,35 @@ export function ClientDetailPage() {
                     </span>
                   )}
                 </td>
+                {isAdmin && (
+                  <td className="px-4 py-3 text-right">
+                    <div className="flex justify-end gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setEditingProject(project)}
+                        className="text-sm font-medium text-[var(--text-secondary)] hover:underline"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (confirm(`Delete project "${project.name}"? This cannot be undone.`)) {
+                            deleteProjectMutation.mutate(project.id);
+                          }
+                        }}
+                        className="text-sm font-medium text-red-500 hover:underline"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </td>
+                )}
               </tr>
             ))}
             {projects?.length === 0 && (
               <tr>
-                <td colSpan={4} className="px-4 py-6 text-center text-[var(--text-muted)]">
+                <td colSpan={isAdmin ? 5 : 4} className="px-4 py-6 text-center text-[var(--text-muted)]">
                   No projects yet.
                 </td>
               </tr>
@@ -175,98 +235,34 @@ export function ClientDetailPage() {
         </table>
       </div>
 
-      {showEditClient && (
-        <Modal title="Edit Client" onClose={() => setShowEditClient(false)}>
-          <form
-            onSubmit={(e: FormEvent) => {
-              e.preventDefault();
-              const form = new FormData(e.target as HTMLFormElement);
-              updateClientMutation.mutate({
-                name: String(form.get("name")),
-                email: String(form.get("email")),
-                company: String(form.get("company") || "") || undefined,
-                hourlyRate: Number(form.get("hourlyRate")),
-              });
-            }}
-          >
-            <FormField label="Name" name="name" required defaultValue={client.name} />
-            <FormField label="Email" name="email" type="email" required defaultValue={client.email} />
-            <FormField label="Company" name="company" defaultValue={client.company ?? ""} />
-            <FormField
-              label="Hourly Rate ($)"
-              name="hourlyRate"
-              type="number"
-              min="0"
-              step="0.01"
-              required
-              defaultValue={client.hourlyRate}
-            />
-            <button
-              type="submit"
-              disabled={updateClientMutation.isPending}
-              className="mt-2 w-full rounded-md bg-[var(--brand-blue)] px-3 py-2 text-sm font-medium text-white hover:bg-[var(--brand-blue-dark)] disabled:opacity-50"
-            >
-              Save
-            </button>
-          </form>
-        </Modal>
+      {showNewProject && (
+        <ProjectForm
+          title="New Project"
+          initialName=""
+          initialTotal=""
+          initialHours=""
+          submitLabel={createProjectMutation.isPending ? "Creating…" : "Create Project"}
+          pending={createProjectMutation.isPending}
+          onClose={() => setShowNewProject(false)}
+          onSubmit={(input) => createProjectMutation.mutate(input)}
+        />
       )}
 
-      {showNewProject && (
-        <Modal
-          title="New Project"
-          onClose={() => {
-            setShowNewProject(false);
-            setNewProjectTotal("");
-            setNewProjectHours("");
-          }}
-        >
-          <form
-            onSubmit={(e: FormEvent) => {
-              e.preventDefault();
-              if (computedRate === null) return;
-              const form = new FormData(e.target as HTMLFormElement);
-              createProjectMutation.mutate({
-                name: String(form.get("name")),
-                rate: Math.round(computedRate * 100) / 100,
-                budgetHours: Number(newProjectHours),
-              });
-            }}
-          >
-            <FormField label="Name" name="name" required />
-            <FormField
-              label="Total Budget ($)"
-              type="number"
-              min="0"
-              step="0.01"
-              required
-              value={newProjectTotal}
-              onChange={(e) => setNewProjectTotal(e.target.value)}
-            />
-            <FormField
-              label="Budget Hours"
-              type="number"
-              min="0"
-              step="any"
-              required
-              value={newProjectHours}
-              onChange={(e) => setNewProjectHours(e.target.value)}
-            />
-            <div className="mb-3 rounded-md bg-[var(--surface-2)] px-3 py-2 text-sm text-[var(--text-secondary)]">
-              Effective hourly rate:{" "}
-              <span className="font-semibold text-[var(--text-primary)]">
-                {computedRate !== null ? `$${computedRate.toFixed(2)}/hr` : "—"}
-              </span>
-            </div>
-            <button
-              type="submit"
-              disabled={createProjectMutation.isPending || computedRate === null}
-              className="mt-2 w-full rounded-md bg-[var(--brand-blue)] px-3 py-2 text-sm font-medium text-white hover:bg-[var(--brand-blue-dark)] disabled:opacity-50"
-            >
-              Create Project
-            </button>
-          </form>
-        </Modal>
+      {editingProject && (
+        <ProjectForm
+          title="Edit Project"
+          initialName={editingProject.name}
+          initialTotal={
+            editingProject.budgetHours
+              ? String(Math.round(Number(editingProject.rate) * Number(editingProject.budgetHours) * 100) / 100)
+              : ""
+          }
+          initialHours={editingProject.budgetHours ?? ""}
+          submitLabel={editProjectMutation.isPending ? "Saving…" : "Save Changes"}
+          pending={editProjectMutation.isPending}
+          onClose={() => setEditingProject(null)}
+          onSubmit={(input) => editProjectMutation.mutate(input)}
+        />
       )}
     </div>
   );

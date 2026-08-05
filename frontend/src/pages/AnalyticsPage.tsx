@@ -105,9 +105,9 @@ export function AnalyticsPage() {
       </div>
 
       <div className="mb-8 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
-        <h2 className="mb-1 text-lg font-semibold text-[var(--text-primary)]">Budget Utilization by Project</h2>
+        <h2 className="mb-1 text-lg font-semibold text-[var(--text-primary)]">Utilization by Project</h2>
         <p className="mb-4 text-sm text-[var(--text-secondary)]">
-          Hours and cost used against budget per project.
+          Hours and cost utilization per project.
         </p>
         <BudgetBarChart data={budgetData} />
       </div>

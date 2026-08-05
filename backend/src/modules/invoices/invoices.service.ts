@@ -4,7 +4,7 @@ import { sendMail } from "../../lib/email/mailer";
 import { generateInvoicePdfBuffer } from "../../lib/pdf/generateInvoicePdf";
 import { logActivity } from "../../lib/activityLog";
 import { getSettings } from "../settings/settings.service";
-import { GenerateInvoiceInput, UpdateStatusInput } from "./invoices.schema";
+import { GenerateInvoiceInput, UpdateInvoiceInput, UpdateStatusInput } from "./invoices.schema";
 
 const invoiceInclude = { client: true, lineItems: true, payments: true } as const;
 
@@ -127,6 +127,50 @@ export async function updateInvoiceStatus(id: string, input: UpdateStatusInput) 
     throw new ApiError(409, "Cannot change the status of a paid invoice");
   }
   return prisma.invoice.update({ where: { id }, data: { status: input.status }, include: invoiceInclude });
+}
+
+export async function updateInvoice(id: string, input: UpdateInvoiceInput) {
+  const invoice = await getInvoice(id);
+  if (invoice.status !== "DRAFT") {
+    throw new ApiError(409, "Only draft invoices can be edited");
+  }
+
+  const tax = input.tax ?? Number(invoice.tax);
+  const total = Math.round((Number(invoice.subtotal) + tax) * 100) / 100;
+
+  return prisma.invoice.update({
+    where: { id },
+    data: {
+      dueDate: input.dueDate ?? undefined,
+      tax,
+      total,
+      notes: input.notes ?? undefined,
+    },
+    include: invoiceInclude,
+  });
+}
+
+export async function deleteInvoice(id: string) {
+  const invoice = await getInvoice(id);
+  if (invoice.status !== "DRAFT") {
+    throw new ApiError(409, "Only draft invoices can be deleted");
+  }
+
+  await prisma.$transaction(async (tx) => {
+    await tx.timeEntry.updateMany({
+      where: { invoiceLineItemId: { in: invoice.lineItems.map((li) => li.id) } },
+      data: { billed: false, invoiceLineItemId: null },
+    });
+    await tx.invoiceLineItem.deleteMany({ where: { invoiceId: id } });
+    await tx.invoice.delete({ where: { id } });
+  });
+
+  await logActivity({
+    entityType: "invoice",
+    entityId: id,
+    action: "deleted",
+    message: `Draft invoice ${invoice.invoiceNumber} was deleted`,
+  });
 }
 
 export async function sendInvoice(id: string) {

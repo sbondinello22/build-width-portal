@@ -3,7 +3,7 @@ import { asyncHandler } from "../../utils/asyncHandler";
 import { validateBody } from "../../middleware/validate.middleware";
 import { requireAuth } from "../../middleware/auth.middleware";
 import { requireRole } from "../../middleware/roles.middleware";
-import { generateInvoiceSchema, updateStatusSchema } from "./invoices.schema";
+import { generateInvoiceSchema, updateInvoiceSchema, updateStatusSchema } from "./invoices.schema";
 import * as controller from "./invoices.controller";
 import { checkoutSessionHandler } from "../payments/payments.controller";
 
@@ -28,3 +28,10 @@ invoicesRouter.patch(
   asyncHandler(controller.updateStatusHandler)
 );
 invoicesRouter.post("/:id/duplicate", requireRole("ADMIN"), asyncHandler(controller.duplicateHandler));
+invoicesRouter.patch(
+  "/:id",
+  requireRole("ADMIN"),
+  validateBody(updateInvoiceSchema),
+  asyncHandler(controller.updateHandler)
+);
+invoicesRouter.delete("/:id", requireRole("ADMIN"), asyncHandler(controller.deleteHandler));

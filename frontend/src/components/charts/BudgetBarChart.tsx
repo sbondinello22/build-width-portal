@@ -14,10 +14,6 @@ function colorFor(pct: number): string {
   return "var(--brand-blue)";
 }
 
-function formatCurrency(n: number) {
-  return `$${n.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
-}
-
 function Bar({
   rowLabel,
   percent,
@@ -53,16 +49,8 @@ export function BudgetBarChart({ data }: { data: BudgetBarDatum[] }) {
         <div key={d.label}>
           <div className="mb-2 font-medium text-[var(--text-primary)]">{d.label}</div>
           <div className="space-y-2">
-            <Bar
-              rowLabel="Hours"
-              percent={d.percentHoursUsed}
-              detail={`${d.percentHoursUsed}% · ${d.hoursLogged}h of ${d.budgetHours}h`}
-            />
-            <Bar
-              rowLabel="Cost"
-              percent={d.percentCostUsed}
-              detail={`${d.percentCostUsed}% · ${formatCurrency(d.billableAmount)} of ${formatCurrency(d.budgetAmount)}`}
-            />
+            <Bar rowLabel="Hours" percent={d.percentHoursUsed} detail={`${d.percentHoursUsed}%`} />
+            <Bar rowLabel="Cost" percent={d.percentCostUsed} detail={`${d.percentCostUsed}%`} />
           </div>
         </div>
       ))}
