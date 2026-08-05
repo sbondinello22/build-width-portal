@@ -1,8 +1,6 @@
 import { useState } from "react";
-import { NavLink, Outlet, useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { NavLink, Outlet } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { listClients } from "../../api/clients";
 import { Logo } from "./Logo";
 
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
@@ -16,46 +14,6 @@ const mobileNavLinkClass = ({ isActive }: { isActive: boolean }) =>
   `block rounded-md px-3 py-2 text-sm font-semibold ${
     isActive ? "bg-[var(--brand-blue)] text-white" : "text-[var(--text-secondary)] hover:bg-[var(--surface-2)]"
   }`;
-
-function ClientsDropdown() {
-  const [open, setOpen] = useState(false);
-  const navigate = useNavigate();
-  const { data: clients } = useQuery({ queryKey: ["clients"], queryFn: listClients, enabled: open });
-
-  return (
-    <div className="relative" onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
-      <button
-        type="button"
-        onClick={() => navigate("/clients")}
-        className={`flex items-center gap-1 px-3 py-3 text-sm font-semibold border-b-2 border-transparent text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)] ${
-          open ? "text-[var(--brand-blue)]" : ""
-        }`}
-      >
-        Clients
-        <svg width="10" height="10" viewBox="0 0 10 10" className={`transition-transform ${open ? "rotate-180" : ""}`}>
-          <path d="M1 3l4 4 4-4" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      </button>
-      {open && (
-        <div className="absolute left-0 top-full z-20 w-56 rounded-md border border-[var(--border)] bg-[var(--surface)] py-2 shadow-lg">
-          <NavLink to="/clients" className="block px-4 py-2 text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--surface-2)]">
-            All Clients
-          </NavLink>
-          {clients && clients.length > 0 && <div className="my-1 border-t border-[var(--border-subtle)]" />}
-          {clients?.slice(0, 8).map((client) => (
-            <NavLink
-              key={client.id}
-              to={`/clients/${client.id}`}
-              className="block px-4 py-2 text-sm text-[var(--text-secondary)] hover:bg-[var(--surface-2)] hover:text-[var(--text-primary)]"
-            >
-              {client.name}
-            </NavLink>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
 
 function MenuIcon({ open }: { open: boolean }) {
   return open ? (
@@ -110,7 +68,9 @@ export function AppShell() {
           <NavLink to="/dashboard" className={navLinkClass}>
             Dashboard
           </NavLink>
-          <ClientsDropdown />
+          <NavLink to="/clients" className={navLinkClass}>
+            Clients
+          </NavLink>
           <NavLink to="/time-tracking" className={navLinkClass}>
             Time Tracking
           </NavLink>

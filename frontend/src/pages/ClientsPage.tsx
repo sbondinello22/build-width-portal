@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "../context/AuthContext";
 import { createClient, listClients } from "../api/clients";
@@ -10,6 +10,7 @@ import { SearchJump } from "../components/ui/SearchJump";
 
 export function ClientsPage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [showCreate, setShowCreate] = useState(false);
   const [name, setName] = useState("");
@@ -81,12 +82,12 @@ export function ClientsPage() {
             </thead>
             <tbody>
               {clients?.map((client) => (
-                <tr key={client.id} className="border-b border-[var(--border-subtle)] last:border-0 hover:bg-[var(--surface-2)]">
-                  <td className="px-4 py-3">
-                    <Link to={`/clients/${client.id}`} className="font-medium text-[var(--text-primary)] hover:underline">
-                      {client.name}
-                    </Link>
-                  </td>
+                <tr
+                  key={client.id}
+                  onClick={() => navigate(`/clients/${client.id}`)}
+                  className="cursor-pointer border-b border-[var(--border-subtle)] last:border-0 hover:bg-[var(--surface-2)]"
+                >
+                  <td className="px-4 py-3 font-medium text-[var(--text-primary)]">{client.name}</td>
                   <td className="px-4 py-3 text-[var(--text-secondary)]">{client.company ?? "—"}</td>
                   <td className="px-4 py-3 text-[var(--text-secondary)]">{client.email}</td>
                   <td className="px-4 py-3 text-[var(--text-secondary)]">${client.hourlyRate}/hr</td>

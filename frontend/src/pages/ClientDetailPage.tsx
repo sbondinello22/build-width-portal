@@ -26,6 +26,8 @@ export function ClientDetailPage() {
 
   const [showEditClient, setShowEditClient] = useState(false);
   const [showNewProject, setShowNewProject] = useState(false);
+  const [newProjectTotal, setNewProjectTotal] = useState("");
+  const [newProjectHours, setNewProjectHours] = useState("");
 
   const { data: client } = useQuery({ queryKey: ["clients", clientId], queryFn: () => getClient(clientId) });
   const { data: projects } = useQuery({
@@ -57,8 +59,15 @@ export function ClientDetailPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["clients", clientId, "projects"] });
       setShowNewProject(false);
+      setNewProjectTotal("");
+      setNewProjectHours("");
     },
   });
+
+  const computedRate =
+    newProjectTotal && newProjectHours && Number(newProjectHours) > 0
+      ? Number(newProjectTotal) / Number(newProjectHours)
+      : null;
 
   const projectStatusMutation = useMutation({
     mutationFn: ({ projectId, status }: { projectId: string; status: ProjectStatus }) =>
@@ -204,25 +213,54 @@ export function ClientDetailPage() {
       )}
 
       {showNewProject && (
-        <Modal title="New Project" onClose={() => setShowNewProject(false)}>
+        <Modal
+          title="New Project"
+          onClose={() => {
+            setShowNewProject(false);
+            setNewProjectTotal("");
+            setNewProjectHours("");
+          }}
+        >
           <form
             onSubmit={(e: FormEvent) => {
               e.preventDefault();
+              if (computedRate === null) return;
               const form = new FormData(e.target as HTMLFormElement);
-              const budgetHours = String(form.get("budgetHours") || "");
               createProjectMutation.mutate({
                 name: String(form.get("name")),
-                rate: Number(form.get("rate")),
-                budgetHours: budgetHours ? Number(budgetHours) : undefined,
+                rate: Math.round(computedRate * 100) / 100,
+                budgetHours: Number(newProjectHours),
               });
             }}
           >
             <FormField label="Name" name="name" required />
-            <FormField label="Rate ($/hr)" name="rate" type="number" min="0" step="0.01" required defaultValue={client.hourlyRate} />
-            <FormField label="Budget Hours (optional)" name="budgetHours" type="number" min="0" step="0.5" />
+            <FormField
+              label="Total Budget ($)"
+              type="number"
+              min="0"
+              step="0.01"
+              required
+              value={newProjectTotal}
+              onChange={(e) => setNewProjectTotal(e.target.value)}
+            />
+            <FormField
+              label="Budget Hours"
+              type="number"
+              min="0"
+              step="any"
+              required
+              value={newProjectHours}
+              onChange={(e) => setNewProjectHours(e.target.value)}
+            />
+            <div className="mb-3 rounded-md bg-[var(--surface-2)] px-3 py-2 text-sm text-[var(--text-secondary)]">
+              Effective hourly rate:{" "}
+              <span className="font-semibold text-[var(--text-primary)]">
+                {computedRate !== null ? `$${computedRate.toFixed(2)}/hr` : "—"}
+              </span>
+            </div>
             <button
               type="submit"
-              disabled={createProjectMutation.isPending}
+              disabled={createProjectMutation.isPending || computedRate === null}
               className="mt-2 w-full rounded-md bg-[var(--brand-blue)] px-3 py-2 text-sm font-medium text-white hover:bg-[var(--brand-blue-dark)] disabled:opacity-50"
             >
               Create Project

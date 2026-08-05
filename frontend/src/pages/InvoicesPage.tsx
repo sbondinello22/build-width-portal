@@ -6,22 +6,11 @@ import { listClients } from "../api/clients";
 import { listProjectsForClient } from "../api/projects";
 import { listTimeEntriesForProject } from "../api/timeEntries";
 import { generateInvoice, listInvoices } from "../api/invoices";
-import type { InvoiceStatus } from "../api/invoices";
 import { Modal } from "../components/ui/Modal";
 import { SearchJump } from "../components/ui/SearchJump";
 import { BarChart } from "../components/charts/BarChart";
-
-const statusStyles: Record<InvoiceStatus, string> = {
-  DRAFT: "bg-[var(--surface-2)] text-[var(--text-secondary)]",
-  SENT: "bg-blue-100 text-blue-800",
-  PAID: "bg-green-100 text-green-800",
-  OVERDUE: "bg-red-100 text-red-800",
-  VOID: "bg-[var(--surface-2)] text-[var(--text-muted)]",
-};
-
-const openStatuses: InvoiceStatus[] = ["DRAFT", "SENT", "OVERDUE"];
-const closedStatuses: InvoiceStatus[] = ["PAID", "VOID"];
-const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+import { InvoicesSubNav } from "../components/layout/InvoicesSubNav";
+import { statusStyles, openStatuses, closedStatuses, monthNames } from "../lib/invoiceDisplay";
 
 type StatusTab = "all" | "open" | "closed";
 
@@ -184,6 +173,8 @@ export function InvoicesPage() {
           </button>
         )}
       </div>
+
+      <InvoicesSubNav />
 
       <div className="mb-6">
         <SearchJump

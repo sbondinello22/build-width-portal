@@ -193,6 +193,15 @@ model Payment {
   @@index([invoiceId])
 }
 
+model Settings {
+  id                          String   @id @default("singleton")
+  defaultPaymentTermsDays     Int      @default(30)
+  defaultTaxRate              Decimal  @default(0) @db.Decimal(5, 2)
+  invoiceNumberPrefix         String   @default("INV-")
+  overdueReminderIntervalDays Int      @default(3)
+  updatedAt                   DateTime @updatedAt
+}
+
 model ActivityLog {
   id         String   @id @default(uuid())
   userId     String?

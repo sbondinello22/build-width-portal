@@ -3,6 +3,7 @@ import { ApiError } from "../../utils/apiError";
 import { sendMail } from "../../lib/email/mailer";
 import { generateInvoicePdfBuffer } from "../../lib/pdf/generateInvoicePdf";
 import { logActivity } from "../../lib/activityLog";
+import { getSettings } from "../settings/settings.service";
 import { GenerateInvoiceInput, UpdateStatusInput } from "./invoices.schema";
 
 const invoiceInclude = { client: true, lineItems: true, payments: true } as const;
@@ -17,9 +18,9 @@ export async function getInvoice(id: string) {
   return invoice;
 }
 
-async function nextInvoiceNumber(): Promise<string> {
+async function nextInvoiceNumber(prefix: string): Promise<string> {
   const count = await prisma.invoice.count();
-  return `INV-${String(count + 1).padStart(4, "0")}`;
+  return `${prefix}${String(count + 1).padStart(4, "0")}`;
 }
 
 export async function generateInvoice(input: GenerateInvoiceInput, createdById: string) {
@@ -67,10 +68,13 @@ export async function generateInvoice(input: GenerateInvoiceInput, createdById: 
     };
   });
 
+  const settings = await getSettings();
   const subtotal = Math.round(lineItemsData.reduce((sum, li) => sum + li.amount, 0) * 100) / 100;
-  const invoiceNumber = await nextInvoiceNumber();
+  const invoiceNumber = await nextInvoiceNumber(settings.invoiceNumberPrefix);
   const dueDate = new Date();
-  dueDate.setDate(dueDate.getDate() + 30);
+  dueDate.setDate(dueDate.getDate() + settings.defaultPaymentTermsDays);
+  const tax = Math.round(subtotal * (Number(settings.defaultTaxRate) / 100) * 100) / 100;
+  const total = Math.round((subtotal + tax) * 100) / 100;
 
   const invoiceId = await prisma.$transaction(async (tx) => {
     const invoice = await tx.invoice.create({
@@ -80,8 +84,8 @@ export async function generateInvoice(input: GenerateInvoiceInput, createdById: 
         status: "DRAFT",
         dueDate,
         subtotal,
-        tax: 0,
-        total: subtotal,
+        tax,
+        total,
         createdById,
       },
     });
@@ -147,4 +151,55 @@ export async function sendInvoice(id: string) {
     message: `Invoice ${updated.invoiceNumber} was emailed to ${updated.client.email}`,
   });
   return updated;
+}
+
+export async function duplicateInvoice(id: string, createdById: string) {
+  const source = await getInvoice(id);
+  const settings = await getSettings();
+
+  const invoiceNumber = await nextInvoiceNumber(settings.invoiceNumberPrefix);
+  const dueDate = new Date();
+  dueDate.setDate(dueDate.getDate() + settings.defaultPaymentTermsDays);
+
+  const newInvoiceId = await prisma.$transaction(async (tx) => {
+    const invoice = await tx.invoice.create({
+      data: {
+        invoiceNumber,
+        clientId: source.clientId,
+        status: "DRAFT",
+        dueDate,
+        subtotal: source.subtotal,
+        tax: source.tax,
+        total: source.total,
+        currency: source.currency,
+        notes: source.notes,
+        createdById,
+      },
+    });
+
+    for (const li of source.lineItems) {
+      await tx.invoiceLineItem.create({
+        data: {
+          invoiceId: invoice.id,
+          projectId: li.projectId,
+          description: li.description,
+          hours: li.hours,
+          rate: li.rate,
+          amount: li.amount,
+        },
+      });
+    }
+
+    return invoice.id;
+  });
+
+  const invoice = await getInvoice(newInvoiceId);
+  await logActivity({
+    userId: createdById,
+    entityType: "invoice",
+    entityId: invoice.id,
+    action: "duplicated",
+    message: `Invoice ${invoice.invoiceNumber} created by repeating ${source.invoiceNumber}`,
+  });
+  return invoice;
 }

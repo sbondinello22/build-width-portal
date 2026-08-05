@@ -1,11 +1,11 @@
 import { prisma } from "../config/prisma";
 import { sendMail } from "../lib/email/mailer";
 import { logActivity } from "../lib/activityLog";
-
-const REMINDER_INTERVAL_DAYS = 3;
+import { getSettings } from "../modules/settings/settings.service";
 
 export async function runOverdueInvoiceCheck() {
   const now = new Date();
+  const settings = await getSettings();
 
   const newlyOverdue = await prisma.invoice.findMany({
     where: { status: "SENT", dueDate: { lt: now } },
@@ -20,7 +20,7 @@ export async function runOverdueInvoiceCheck() {
     });
   }
 
-  const reminderCutoff = new Date(now.getTime() - REMINDER_INTERVAL_DAYS * 86_400_000);
+  const reminderCutoff = new Date(now.getTime() - settings.overdueReminderIntervalDays * 86_400_000);
   const dueForReminder = await prisma.invoice.findMany({
     where: {
       status: "OVERDUE",

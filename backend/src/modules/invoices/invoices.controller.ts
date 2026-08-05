@@ -34,3 +34,8 @@ export async function updateStatusHandler(req: Request, res: Response) {
   const invoice = await invoicesService.updateInvoiceStatus(req.params.id, req.body);
   res.json({ invoice });
 }
+
+export async function duplicateHandler(req: Request, res: Response) {
+  const invoice = await invoicesService.duplicateInvoice(req.params.id, req.user!.id);
+  res.status(201).json({ invoice });
+}

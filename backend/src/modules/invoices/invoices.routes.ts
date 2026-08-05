@@ -27,3 +27,4 @@ invoicesRouter.patch(
   validateBody(updateStatusSchema),
   asyncHandler(controller.updateStatusHandler)
 );
+invoicesRouter.post("/:id/duplicate", requireRole("ADMIN"), asyncHandler(controller.duplicateHandler));

@@ -50,6 +50,11 @@ export async function updateInvoiceStatus(id: string, status: InvoiceStatus) {
   return data.invoice;
 }
 
+export async function duplicateInvoice(id: string) {
+  const { data } = await api.post<{ invoice: Invoice }>(`/invoices/${id}/duplicate`);
+  return data.invoice;
+}
+
 export function invoicePdfUrl(id: string) {
   return `${api.defaults.baseURL}/invoices/${id}/pdf`;
 }

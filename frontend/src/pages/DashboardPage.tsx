@@ -18,7 +18,7 @@ export function DashboardPage() {
         <ThemeToggle />
       </div>
 
-      <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <StatTile
           label="Outstanding Balance"
           value={summary ? formatCurrency(summary.outstandingBalance) : "…"}
@@ -26,16 +26,12 @@ export function DashboardPage() {
           to="/invoices"
         />
         <StatTile
-          label="Overdue Invoices"
-          value={summary ? String(summary.overdueCount) : "…"}
+          label="Overdue"
+          value={summary ? formatCurrency(summary.overdueAmount) : "…"}
+          secondary={summary ? `${summary.overdueCount} invoice${summary.overdueCount === 1 ? "" : "s"}` : undefined}
           tone={summary && summary.overdueCount > 0 ? "critical" : "default"}
           accent="orange"
-        />
-        <StatTile
-          label="Overdue Amount"
-          value={summary ? formatCurrency(summary.overdueAmount) : "…"}
-          tone={summary && summary.overdueAmount > 0 ? "critical" : "default"}
-          accent="orange"
+          to="/invoices/overdue"
         />
         <StatTile
           label="Billable Hours (This Month)"

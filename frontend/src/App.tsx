@@ -10,6 +10,10 @@ import { ClientDetailPage } from "./pages/ClientDetailPage";
 import { TimeTrackingPage } from "./pages/TimeTrackingPage";
 import { InvoicesPage } from "./pages/InvoicesPage";
 import { InvoiceDetailPage } from "./pages/InvoiceDetailPage";
+import { DraftInvoicesPage } from "./pages/DraftInvoicesPage";
+import { OverdueInvoicesPage } from "./pages/OverdueInvoicesPage";
+import { RecurringInvoicesPage } from "./pages/RecurringInvoicesPage";
+import { InvoiceConfigPage } from "./pages/InvoiceConfigPage";
 import { AnalyticsPage } from "./pages/AnalyticsPage";
 import { UsersPage } from "./pages/UsersPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
@@ -28,9 +32,13 @@ function App() {
           <Route path="/clients/:id" element={<ClientDetailPage />} />
           <Route path="/time-tracking" element={<TimeTrackingPage />} />
           <Route path="/invoices" element={<InvoicesPage />} />
+          <Route path="/invoices/draft" element={<DraftInvoicesPage />} />
+          <Route path="/invoices/overdue" element={<OverdueInvoicesPage />} />
+          <Route path="/invoices/recurring" element={<RecurringInvoicesPage />} />
           <Route path="/invoices/:id" element={<InvoiceDetailPage />} />
 
           <Route element={<RoleGuard allow={["ADMIN"]} />}>
+            <Route path="/invoices/configure" element={<InvoiceConfigPage />} />
             <Route path="/analytics" element={<AnalyticsPage />} />
             <Route path="/users" element={<UsersPage />} />
           </Route>
