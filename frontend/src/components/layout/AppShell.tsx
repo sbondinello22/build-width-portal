@@ -115,6 +115,11 @@ export function AppShell() {
             Invoices
           </NavLink>
           {user?.role === "ADMIN" && (
+            <NavLink to="/analytics" className={navLinkClass}>
+              Analytics
+            </NavLink>
+          )}
+          {user?.role === "ADMIN" && (
             <NavLink to="/users" className={navLinkClass}>
               Users
             </NavLink>
@@ -135,6 +140,11 @@ export function AppShell() {
             <NavLink to="/invoices" className={mobileNavLinkClass} onClick={() => setMobileOpen(false)}>
               Invoices
             </NavLink>
+            {user?.role === "ADMIN" && (
+              <NavLink to="/analytics" className={mobileNavLinkClass} onClick={() => setMobileOpen(false)}>
+                Analytics
+              </NavLink>
+            )}
             {user?.role === "ADMIN" && (
               <NavLink to="/users" className={mobileNavLinkClass} onClick={() => setMobileOpen(false)}>
                 Users

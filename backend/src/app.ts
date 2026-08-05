@@ -9,6 +9,7 @@ import { projectsRouter } from "./modules/projects/projects.routes";
 import { timeEntriesRouter } from "./modules/time-entries/time-entries.routes";
 import { invoicesRouter } from "./modules/invoices/invoices.routes";
 import { dashboardRouter } from "./modules/dashboard/dashboard.routes";
+import { analyticsRouter } from "./modules/analytics/analytics.routes";
 import { webhookHandler } from "./modules/payments/payments.controller";
 import { asyncHandler } from "./utils/asyncHandler";
 
@@ -29,6 +30,7 @@ app.use("/api/projects", projectsRouter);
 app.use("/api/time-entries", timeEntriesRouter);
 app.use("/api/invoices", invoicesRouter);
 app.use("/api/dashboard", dashboardRouter);
+app.use("/api/analytics", analyticsRouter);
 
 app.use((_req, res) => res.status(404).json({ error: "Not found" }));
 app.use(errorMiddleware);

@@ -10,6 +10,7 @@ import { ClientDetailPage } from "./pages/ClientDetailPage";
 import { TimeTrackingPage } from "./pages/TimeTrackingPage";
 import { InvoicesPage } from "./pages/InvoicesPage";
 import { InvoiceDetailPage } from "./pages/InvoiceDetailPage";
+import { AnalyticsPage } from "./pages/AnalyticsPage";
 import { UsersPage } from "./pages/UsersPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
 
@@ -30,6 +31,7 @@ function App() {
           <Route path="/invoices/:id" element={<InvoiceDetailPage />} />
 
           <Route element={<RoleGuard allow={["ADMIN"]} />}>
+            <Route path="/analytics" element={<AnalyticsPage />} />
             <Route path="/users" element={<UsersPage />} />
           </Route>
         </Route>

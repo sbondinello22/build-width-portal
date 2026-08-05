@@ -6,6 +6,7 @@ import { useAuth } from "../context/AuthContext";
 import { createClient, listClients } from "../api/clients";
 import { Modal } from "../components/ui/Modal";
 import { FormField } from "../components/ui/FormField";
+import { SearchJump } from "../components/ui/SearchJump";
 
 export function ClientsPage() {
   const { user } = useAuth();
@@ -51,6 +52,18 @@ export function ClientsPage() {
             New Client
           </button>
         )}
+      </div>
+
+      <div className="mb-4">
+        <SearchJump
+          placeholder="Search clients by name, company, or email…"
+          items={(clients ?? []).map((c) => ({
+            id: c.id,
+            label: c.name,
+            sublabel: c.company ? `${c.company} · ${c.email}` : c.email,
+            to: `/clients/${c.id}`,
+          }))}
+        />
       </div>
 
       {isLoading ? (
