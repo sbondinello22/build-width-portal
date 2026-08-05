@@ -103,7 +103,7 @@ export function InvoiceDetailPage() {
               type="button"
               onClick={() => sendMutation.mutate()}
               disabled={sendMutation.isPending}
-              className="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50"
+              className="rounded-md bg-[var(--brand-blue)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--brand-blue-dark)] disabled:opacity-50"
             >
               {sendMutation.isPending ? "Sending…" : "Send to Client"}
             </button>

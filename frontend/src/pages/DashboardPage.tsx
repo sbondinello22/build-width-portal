@@ -15,18 +15,28 @@ export function DashboardPage() {
       <h1 className="mb-6 text-2xl font-semibold text-gray-900">Dashboard</h1>
 
       <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatTile label="Outstanding Balance" value={summary ? formatCurrency(summary.outstandingBalance) : "…"} />
+        <StatTile
+          label="Outstanding Balance"
+          value={summary ? formatCurrency(summary.outstandingBalance) : "…"}
+          accent="blue"
+        />
         <StatTile
           label="Overdue Invoices"
           value={summary ? String(summary.overdueCount) : "…"}
           tone={summary && summary.overdueCount > 0 ? "critical" : "default"}
+          accent="orange"
         />
         <StatTile
           label="Overdue Amount"
           value={summary ? formatCurrency(summary.overdueAmount) : "…"}
           tone={summary && summary.overdueAmount > 0 ? "critical" : "default"}
+          accent="orange"
         />
-        <StatTile label="Hours This Month" value={summary ? `${summary.hoursThisMonth}h` : "…"} />
+        <StatTile
+          label="Hours This Month"
+          value={summary ? `${summary.hoursThisMonth}h` : "…"}
+          accent="violet"
+        />
       </div>
 
       <h2 className="mb-3 text-lg font-semibold text-gray-900">Recent Activity</h2>

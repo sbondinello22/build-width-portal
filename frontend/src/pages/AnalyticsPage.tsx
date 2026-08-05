@@ -62,7 +62,7 @@ export function AnalyticsPage() {
                 type="button"
                 onClick={() => setGroupBy(opt.value)}
                 className={`px-3 py-2 text-sm font-medium ${
-                  groupBy === opt.value ? "bg-gray-900 text-white" : "bg-white text-gray-700 hover:bg-gray-50"
+                  groupBy === opt.value ? "bg-[var(--brand-blue)] text-white" : "bg-white text-gray-700 hover:bg-gray-50"
                 }`}
               >
                 {opt.label}

@@ -2,9 +2,15 @@
 
 :root {
   color-scheme: light dark;
+  --brand-blue: #2a78d6;
+  --brand-blue-dark: #1c5cab;
+  --brand-orange: #eb6834;
+  --brand-violet: #8b5cf6;
+  --page-bg: #faf6ec;
 }
 
 body {
   margin: 0;
   font-family: "Poppins", system-ui, "Segoe UI", Roboto, sans-serif;
+  background-color: var(--page-bg);
 }

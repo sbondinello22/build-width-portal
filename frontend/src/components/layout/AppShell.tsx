@@ -6,13 +6,15 @@ import { listClients } from "../../api/clients";
 import { Logo } from "./Logo";
 
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
-  `px-3 py-3 text-sm font-medium border-b-2 ${
-    isActive ? "border-gray-900 text-gray-900" : "border-transparent text-gray-600 hover:text-gray-900"
+  `px-3 py-3 text-sm font-semibold border-b-2 transition-colors ${
+    isActive
+      ? "border-[var(--brand-blue)] text-[var(--brand-blue)]"
+      : "border-transparent text-gray-600 hover:text-gray-900"
   }`;
 
 const mobileNavLinkClass = ({ isActive }: { isActive: boolean }) =>
-  `block rounded-md px-3 py-2 text-sm font-medium ${
-    isActive ? "bg-gray-900 text-white" : "text-gray-700 hover:bg-gray-100"
+  `block rounded-md px-3 py-2 text-sm font-semibold ${
+    isActive ? "bg-[var(--brand-blue)] text-white" : "text-gray-700 hover:bg-gray-100"
   }`;
 
 function ClientsDropdown() {
@@ -25,8 +27,8 @@ function ClientsDropdown() {
       <button
         type="button"
         onClick={() => navigate("/clients")}
-        className={`flex items-center gap-1 px-3 py-3 text-sm font-medium border-b-2 border-transparent text-gray-600 hover:text-gray-900 ${
-          open ? "text-gray-900" : ""
+        className={`flex items-center gap-1 px-3 py-3 text-sm font-semibold border-b-2 border-transparent text-gray-600 transition-colors hover:text-gray-900 ${
+          open ? "text-[var(--brand-blue)]" : ""
         }`}
       >
         Clients
@@ -72,8 +74,9 @@ export function AppShell() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="border-b border-gray-200 bg-white">
+    <div className="min-h-screen bg-[var(--page-bg)]">
+      <header className="border-b border-gray-200 bg-white shadow-sm">
+        <div className="h-1.5 bg-gradient-to-r from-[var(--brand-blue)] via-[var(--brand-orange)] to-[var(--brand-violet)]" />
         <div className="flex items-center justify-between px-4 py-4 sm:px-6">
           <NavLink to="/dashboard" onClick={() => setMobileOpen(false)}>
             <Logo />

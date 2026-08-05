@@ -111,7 +111,7 @@ function GenerateInvoiceModal({ onClose }: { onClose: () => void }) {
         type="button"
         disabled={selected.size === 0 || generateMutation.isPending}
         onClick={() => generateMutation.mutate()}
-        className="w-full rounded-md bg-gray-900 px-3 py-2 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50"
+        className="w-full rounded-md bg-[var(--brand-blue)] px-3 py-2 text-sm font-medium text-white hover:bg-[var(--brand-blue-dark)] disabled:opacity-50"
       >
         {generateMutation.isPending ? "Generating…" : `Generate Invoice (${selected.size} entries)`}
       </button>
@@ -171,7 +171,7 @@ export function InvoicesPage() {
           <button
             type="button"
             onClick={() => setShowGenerate(true)}
-            className="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
+            className="rounded-md bg-[var(--brand-blue)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--brand-blue-dark)]"
           >
             Generate Invoice
           </button>
@@ -226,7 +226,7 @@ export function InvoicesPage() {
               type="button"
               onClick={() => setStatusTab(tab.key)}
               className={`px-4 py-2 text-sm font-medium ${
-                statusTab === tab.key ? "bg-gray-900 text-white" : "bg-white text-gray-700 hover:bg-gray-50"
+                statusTab === tab.key ? "bg-[var(--brand-blue)] text-white" : "bg-white text-gray-700 hover:bg-gray-50"
               }`}
             >
               {tab.label}
