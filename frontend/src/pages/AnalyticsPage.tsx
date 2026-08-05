@@ -4,6 +4,7 @@ import { getHoursTimeSeries, getProjectAnalytics } from "../api/analytics";
 import type { GroupBy } from "../api/analytics";
 import { useAllProjects } from "../hooks/useAllProjects";
 import { BarChart } from "../components/charts/BarChart";
+import { LineChart } from "../components/charts/LineChart";
 import { BudgetBarChart } from "../components/charts/BudgetBarChart";
 
 const groupByOptions: { value: GroupBy; label: string }[] = [
@@ -42,6 +43,12 @@ export function AnalyticsPage() {
     series?.map((point) => ({
       label: formatPeriodLabel(point.periodStart, groupBy),
       values: { billable: point.billableHours, nonBillable: point.nonBillableHours },
+    })) ?? [];
+
+  const costChartData =
+    series?.map((point) => ({
+      label: formatPeriodLabel(point.periodStart, groupBy),
+      values: { billable: point.billableAmount, nonBillable: point.nonBillableAmount },
     })) ?? [];
 
   const budgetData = (projectAnalytics ?? [])
@@ -95,13 +102,34 @@ export function AnalyticsPage() {
         </label>
       </div>
 
-      <div className="mb-8 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
-        <h2 className="mb-1 text-lg font-semibold text-[var(--text-primary)]">Hours Logged</h2>
-        <p className="mb-4 text-sm text-[var(--text-secondary)]">Billable vs non-billable hours over time.</p>
-        <BarChart data={chartData} series={[
-          { key: "billable", label: "Billable", color: "var(--brand-blue)" },
-          { key: "nonBillable", label: "Non-billable", color: "var(--brand-orange)" },
-        ]} valueFormatter={(n) => `${n}h`} />
+      <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
+          <h2 className="mb-1 text-lg font-semibold text-[var(--text-primary)]">Hours Logged</h2>
+          <p className="mb-4 text-sm text-[var(--text-secondary)]">Billable vs non-billable hours over time.</p>
+          <BarChart
+            data={chartData}
+            series={[
+              { key: "billable", label: "Billable", color: "var(--brand-blue)" },
+              { key: "nonBillable", label: "Non-billable", color: "var(--brand-orange)" },
+            ]}
+            valueFormatter={(n) => `${n}h`}
+            axisLabel="Hours"
+          />
+        </div>
+
+        <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
+          <h2 className="mb-1 text-lg font-semibold text-[var(--text-primary)]">Cost Over Time</h2>
+          <p className="mb-4 text-sm text-[var(--text-secondary)]">Billable vs. non-billable cost earned over time.</p>
+          <LineChart
+            data={costChartData}
+            series={[
+              { key: "billable", label: "Billable ($)", color: "var(--brand-blue)" },
+              { key: "nonBillable", label: "Non-billable ($)", color: "var(--brand-orange)" },
+            ]}
+            valueFormatter={(n) => formatCurrency(n)}
+            axisLabel="Cost ($)"
+          />
+        </div>
       </div>
 
       <div className="mb-8 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">

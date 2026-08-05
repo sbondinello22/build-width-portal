@@ -12,27 +12,45 @@ export interface BarChartDatum {
 }
 
 const TOP_PAD = 68;
+const LEFT_PAD = 64;
+const LEFT_PAD_WITH_AXIS_LABEL = 78;
+const Y_TICK_COUNT = 4;
+
+function niceStep(rawStep: number): number {
+  if (rawStep <= 0) return 1;
+  const magnitude = Math.pow(10, Math.floor(Math.log10(rawStep)));
+  const normalized = rawStep / magnitude;
+  const niceNormalized = normalized <= 1 ? 1 : normalized <= 2 ? 2 : normalized <= 5 ? 5 : 10;
+  return niceNormalized * magnitude;
+}
 
 export function BarChart({
   data,
   series,
   height = 220,
   valueFormatter = (n: number) => n.toLocaleString(),
+  axisLabel,
 }: {
   data: BarChartDatum[];
   series: BarChartSeries[];
   height?: number;
   valueFormatter?: (n: number) => string;
+  axisLabel?: string;
 }) {
   const [hover, setHover] = useState<number | null>(null);
 
   const totals = data.map((d) => series.reduce((sum, s) => sum + (d.values[s.key] ?? 0), 0));
-  const max = Math.max(1, ...totals);
+  const rawMax = Math.max(1, ...totals);
+  const step = niceStep(rawMax / Y_TICK_COUNT);
+  const max = step * Y_TICK_COUNT;
+  const yTicks = Array.from({ length: Y_TICK_COUNT + 1 }, (_, i) => i * step);
 
-  const width = Math.max(360, data.length * 56);
+  const leftPad = axisLabel ? LEFT_PAD_WITH_AXIS_LABEL : LEFT_PAD;
+  const plotWidth = Math.max(360, data.length * 56);
+  const width = plotWidth + leftPad;
   const chartHeight = height;
   const axisY = TOP_PAD + chartHeight;
-  const barSlot = width / Math.max(1, data.length);
+  const barSlot = plotWidth / Math.max(1, data.length);
   const barWidth = Math.max(8, barSlot * 0.55);
   const tooltipHeight = series.length > 1 ? 20 + series.length * 16 : 36;
 
@@ -55,9 +73,32 @@ export function BarChart({
           viewBox={`0 0 ${width} ${axisY + 32}`}
           className="min-w-full"
         >
-          <line x1={0} y1={axisY} x2={width} y2={axisY} stroke="var(--chart-axis)" strokeWidth={1} />
+          {yTicks.map((tick) => {
+            const y = axisY - (tick / max) * (chartHeight - 12);
+            return (
+              <g key={tick}>
+                <line x1={leftPad} y1={y} x2={width} y2={y} stroke="var(--chart-axis)" strokeWidth={1} opacity={tick === 0 ? 0 : 0.35} strokeDasharray={tick === 0 ? undefined : "3 3"} />
+                <text x={leftPad - 8} y={y + 3} textAnchor="end" fontSize={10} fill="var(--chart-muted)">
+                  {valueFormatter(tick)}
+                </text>
+              </g>
+            );
+          })}
+          {axisLabel && (
+            <text
+              x={-(axisY / 2)}
+              y={12}
+              textAnchor="middle"
+              fontSize={10}
+              fill="var(--chart-muted)"
+              transform="rotate(-90)"
+            >
+              {axisLabel}
+            </text>
+          )}
+          <line x1={leftPad} y1={axisY} x2={width} y2={axisY} stroke="var(--chart-axis)" strokeWidth={1} />
           {data.map((d, i) => {
-            const x = i * barSlot + (barSlot - barWidth) / 2;
+            const x = leftPad + i * barSlot + (barSlot - barWidth) / 2;
             let yCursor = axisY;
             const segments = series.map((s) => {
               const value = d.values[s.key] ?? 0;
@@ -70,7 +111,7 @@ export function BarChart({
             const isHover = hover === i;
             const topSegmentY = segments[segments.length - 1]?.y ?? axisY;
             const tooltipY = Math.max(4, topSegmentY - tooltipHeight - 8);
-            const tooltipX = Math.min(Math.max(x - 40, 4), width - 144);
+            const tooltipX = Math.min(Math.max(x - 40, LEFT_PAD + 4), width - 144);
 
             return (
               <g
