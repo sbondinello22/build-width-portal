@@ -13,7 +13,7 @@ const statusStyles: Record<ProjectStatus, string> = {
   ACTIVE: "bg-green-100 text-green-800",
   ON_HOLD: "bg-yellow-100 text-yellow-800",
   COMPLETED: "bg-blue-100 text-blue-800",
-  ARCHIVED: "bg-gray-100 text-gray-600",
+  ARCHIVED: "bg-[var(--surface-2)] text-[var(--text-secondary)]",
 };
 
 export function ClientDetailPage() {
@@ -67,15 +67,15 @@ export function ClientDetailPage() {
   });
 
   if (!client) {
-    return <p className="text-gray-500">Loading…</p>;
+    return <p className="text-[var(--text-secondary)]">Loading…</p>;
   }
 
   return (
     <div>
       <div className="mb-6 flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-900">{client.name}</h1>
-          <p className="text-gray-500">
+          <h1 className="text-2xl font-semibold text-[var(--text-primary)]">{client.name}</h1>
+          <p className="text-[var(--text-secondary)]">
             {client.company ? `${client.company} · ` : ""}
             {client.email} · ${client.hourlyRate}/hr default rate
           </p>
@@ -85,7 +85,7 @@ export function ClientDetailPage() {
             <button
               type="button"
               onClick={() => setShowEditClient(true)}
-              className="rounded-md border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              className="rounded-md border border-[var(--border)] px-3 py-2 text-sm font-medium text-[var(--text-secondary)] hover:bg-[var(--surface-2)]"
             >
               Edit
             </button>
@@ -96,7 +96,7 @@ export function ClientDetailPage() {
                   deleteClientMutation.mutate();
                 }
               }}
-              className="rounded-md border border-red-200 px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50"
+              className="rounded-md border border-[var(--danger-border)] px-3 py-2 text-sm font-medium text-red-500 hover:bg-[var(--danger-hover-bg)]"
             >
               Delete
             </button>
@@ -105,7 +105,7 @@ export function ClientDetailPage() {
       </div>
 
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-900">Projects</h2>
+        <h2 className="text-lg font-semibold text-[var(--text-primary)]">Projects</h2>
         {isAdmin && (
           <button
             type="button"
@@ -117,9 +117,9 @@ export function ClientDetailPage() {
         )}
       </div>
 
-      <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white">
+      <div className="overflow-x-auto rounded-lg border border-[var(--border)] bg-[var(--surface)]">
         <table className="w-full text-left text-sm">
-          <thead className="border-b border-gray-200 bg-gray-50 text-gray-500">
+          <thead className="border-b border-[var(--border)] bg-[var(--surface-2)] text-[var(--text-secondary)]">
             <tr>
               <th className="px-4 py-3 font-medium">Name</th>
               <th className="px-4 py-3 font-medium">Rate</th>
@@ -129,10 +129,10 @@ export function ClientDetailPage() {
           </thead>
           <tbody>
             {projects?.map((project) => (
-              <tr key={project.id} className="border-b border-gray-100 last:border-0">
-                <td className="px-4 py-3 font-medium text-gray-900">{project.name}</td>
-                <td className="px-4 py-3 text-gray-600">${project.rate}/hr</td>
-                <td className="px-4 py-3 text-gray-600">{project.budgetHours ?? "—"}</td>
+              <tr key={project.id} className="border-b border-[var(--border-subtle)] last:border-0">
+                <td className="px-4 py-3 font-medium text-[var(--text-primary)]">{project.name}</td>
+                <td className="px-4 py-3 text-[var(--text-secondary)]">${project.rate}/hr</td>
+                <td className="px-4 py-3 text-[var(--text-secondary)]">{project.budgetHours ?? "—"}</td>
                 <td className="px-4 py-3">
                   {isAdmin ? (
                     <select
@@ -157,7 +157,7 @@ export function ClientDetailPage() {
             ))}
             {projects?.length === 0 && (
               <tr>
-                <td colSpan={4} className="px-4 py-6 text-center text-gray-400">
+                <td colSpan={4} className="px-4 py-6 text-center text-[var(--text-muted)]">
                   No projects yet.
                 </td>
               </tr>

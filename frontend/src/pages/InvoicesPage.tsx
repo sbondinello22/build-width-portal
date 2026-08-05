@@ -12,11 +12,11 @@ import { SearchJump } from "../components/ui/SearchJump";
 import { BarChart } from "../components/charts/BarChart";
 
 const statusStyles: Record<InvoiceStatus, string> = {
-  DRAFT: "bg-gray-100 text-gray-700",
+  DRAFT: "bg-[var(--surface-2)] text-[var(--text-secondary)]",
   SENT: "bg-blue-100 text-blue-800",
   PAID: "bg-green-100 text-green-800",
   OVERDUE: "bg-red-100 text-red-800",
-  VOID: "bg-gray-100 text-gray-400",
+  VOID: "bg-[var(--surface-2)] text-[var(--text-muted)]",
 };
 
 const openStatuses: InvoiceStatus[] = ["DRAFT", "SENT", "OVERDUE"];
@@ -71,14 +71,14 @@ function GenerateInvoiceModal({ onClose }: { onClose: () => void }) {
   return (
     <Modal title="Generate Invoice" onClose={onClose}>
       <label className="mb-4 block text-sm">
-        <span className="mb-1 block font-medium text-gray-700">Client</span>
+        <span className="mb-1 block font-medium text-[var(--text-secondary)]">Client</span>
         <select
           value={clientId}
           onChange={(e) => {
             setClientId(e.target.value);
             setSelected(new Set());
           }}
-          className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-900 focus:outline-none"
+          className="w-full rounded-md border border-[var(--border)] px-3 py-2 text-sm focus:border-[var(--brand-blue)] focus:outline-none"
         >
           <option value="">Select a client</option>
           {clients?.map((c) => (
@@ -90,17 +90,17 @@ function GenerateInvoiceModal({ onClose }: { onClose: () => void }) {
       </label>
 
       {clientId && (
-        <div className="mb-4 max-h-64 overflow-y-auto rounded-md border border-gray-200">
+        <div className="mb-4 max-h-64 overflow-y-auto rounded-md border border-[var(--border)]">
           {billableEntries.length === 0 ? (
-            <p className="p-3 text-sm text-gray-400">No unbilled time entries for this client.</p>
+            <p className="p-3 text-sm text-[var(--text-muted)]">No unbilled time entries for this client.</p>
           ) : (
             billableEntries.map((entry) => (
-              <label key={entry.id} className="flex items-center gap-2 border-b border-gray-100 px-3 py-2 text-sm last:border-0">
+              <label key={entry.id} className="flex items-center gap-2 border-b border-[var(--border-subtle)] px-3 py-2 text-sm last:border-0">
                 <input type="checkbox" checked={selected.has(entry.id)} onChange={() => toggle(entry.id)} />
                 <span className="flex-1">
                   {entry.projectName} — {entry.description || "(no description)"}
                 </span>
-                <span className="text-gray-500">{((entry.durationMinutes ?? 0) / 60).toFixed(2)}h</span>
+                <span className="text-[var(--text-secondary)]">{((entry.durationMinutes ?? 0) / 60).toFixed(2)}h</span>
               </label>
             ))
           )}
@@ -166,7 +166,7 @@ export function InvoicesPage() {
   return (
     <div>
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-gray-900">Invoices</h1>
+        <h1 className="text-2xl font-semibold text-[var(--text-primary)]">Invoices</h1>
         {user?.role === "ADMIN" && (
           <button
             type="button"
@@ -190,16 +190,16 @@ export function InvoicesPage() {
         />
       </div>
 
-      <div className="mb-8 rounded-lg border border-gray-200 bg-white p-5">
+      <div className="mb-8 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h2 className="text-lg font-semibold text-gray-900">Invoice History</h2>
-            <p className="text-sm text-gray-500">Paid vs. open invoice totals per month (voided invoices excluded).</p>
+            <h2 className="text-lg font-semibold text-[var(--text-primary)]">Invoice History</h2>
+            <p className="text-sm text-[var(--text-secondary)]">Paid vs. open invoice totals per month (voided invoices excluded).</p>
           </div>
           <select
             value={year}
             onChange={(e) => setYear(Number(e.target.value))}
-            className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-900 focus:outline-none"
+            className="rounded-md border border-[var(--border)] px-3 py-2 text-sm focus:border-[var(--brand-blue)] focus:outline-none"
           >
             {years.map((y) => (
               <option key={y} value={y}>
@@ -212,21 +212,21 @@ export function InvoicesPage() {
           data={monthlyData}
           series={[
             { key: "paid", label: "Paid", color: "#0ca30c" },
-            { key: "open", label: "Open", color: "#2a78d6" },
+            { key: "open", label: "Open", color: "var(--brand-blue)" },
           ]}
           valueFormatter={(n) => `$${n.toLocaleString()}`}
         />
       </div>
 
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex overflow-hidden rounded-md border border-gray-300">
+        <div className="flex overflow-hidden rounded-md border border-[var(--border)]">
           {tabs.map((tab) => (
             <button
               key={tab.key}
               type="button"
               onClick={() => setStatusTab(tab.key)}
               className={`px-4 py-2 text-sm font-medium ${
-                statusTab === tab.key ? "bg-[var(--brand-blue)] text-white" : "bg-white text-gray-700 hover:bg-gray-50"
+                statusTab === tab.key ? "bg-[var(--brand-blue)] text-white" : "bg-[var(--surface)] text-[var(--text-secondary)] hover:bg-[var(--surface-2)]"
               }`}
             >
               {tab.label}
@@ -236,7 +236,7 @@ export function InvoicesPage() {
         <select
           value={clientFilter}
           onChange={(e) => setClientFilter(e.target.value)}
-          className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-900 focus:outline-none"
+          className="rounded-md border border-[var(--border)] px-3 py-2 text-sm focus:border-[var(--brand-blue)] focus:outline-none"
         >
           <option value="">All Clients</option>
           {clients?.map((c) => (
@@ -248,11 +248,11 @@ export function InvoicesPage() {
       </div>
 
       {isLoading ? (
-        <p className="text-gray-500">Loading…</p>
+        <p className="text-[var(--text-secondary)]">Loading…</p>
       ) : (
-        <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white">
+        <div className="overflow-x-auto rounded-lg border border-[var(--border)] bg-[var(--surface)]">
           <table className="w-full text-left text-sm">
-            <thead className="border-b border-gray-200 bg-gray-50 text-gray-500">
+            <thead className="border-b border-[var(--border)] bg-[var(--surface-2)] text-[var(--text-secondary)]">
               <tr>
                 <th className="px-4 py-3 font-medium">Invoice #</th>
                 <th className="px-4 py-3 font-medium">Client</th>
@@ -263,15 +263,15 @@ export function InvoicesPage() {
             </thead>
             <tbody>
               {tableInvoices.map((invoice) => (
-                <tr key={invoice.id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50">
+                <tr key={invoice.id} className="border-b border-[var(--border-subtle)] last:border-0 hover:bg-[var(--surface-2)]">
                   <td className="px-4 py-3">
-                    <Link to={`/invoices/${invoice.id}`} className="font-medium text-gray-900 hover:underline">
+                    <Link to={`/invoices/${invoice.id}`} className="font-medium text-[var(--text-primary)] hover:underline">
                       {invoice.invoiceNumber}
                     </Link>
                   </td>
-                  <td className="px-4 py-3 text-gray-600">{invoice.client.name}</td>
-                  <td className="px-4 py-3 text-gray-600">{new Date(invoice.dueDate).toLocaleDateString()}</td>
-                  <td className="px-4 py-3 text-gray-600">${invoice.total}</td>
+                  <td className="px-4 py-3 text-[var(--text-secondary)]">{invoice.client.name}</td>
+                  <td className="px-4 py-3 text-[var(--text-secondary)]">{new Date(invoice.dueDate).toLocaleDateString()}</td>
+                  <td className="px-4 py-3 text-[var(--text-secondary)]">${invoice.total}</td>
                   <td className="px-4 py-3">
                     <span className={`rounded-full px-2 py-1 text-xs font-medium ${statusStyles[invoice.status]}`}>
                       {invoice.status}
@@ -281,7 +281,7 @@ export function InvoicesPage() {
               ))}
               {tableInvoices.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-4 py-6 text-center text-gray-400">
+                  <td colSpan={5} className="px-4 py-6 text-center text-[var(--text-muted)]">
                     No invoices match this filter.
                   </td>
                 </tr>

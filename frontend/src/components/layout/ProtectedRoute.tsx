@@ -5,7 +5,7 @@ export function ProtectedRoute() {
   const { user, loading } = useAuth();
 
   if (loading) {
-    return <div className="flex h-screen items-center justify-center text-gray-500">Loading…</div>;
+    return <div className="flex h-screen items-center justify-center text-[var(--text-secondary)]">Loading…</div>;
   }
 
   if (!user) {

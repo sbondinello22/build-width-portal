@@ -50,19 +50,19 @@ export function AnalyticsPage() {
 
   return (
     <div>
-      <h1 className="mb-6 text-2xl font-semibold text-gray-900">Analytics &amp; Reports</h1>
+      <h1 className="mb-6 text-2xl font-semibold text-[var(--text-primary)]">Analytics &amp; Reports</h1>
 
       <div className="mb-6 flex flex-wrap items-end gap-4">
         <label className="text-sm">
-          <span className="mb-1 block font-medium text-gray-700">Period</span>
-          <div className="flex overflow-hidden rounded-md border border-gray-300">
+          <span className="mb-1 block font-medium text-[var(--text-secondary)]">Period</span>
+          <div className="flex overflow-hidden rounded-md border border-[var(--border)]">
             {groupByOptions.map((opt) => (
               <button
                 key={opt.value}
                 type="button"
                 onClick={() => setGroupBy(opt.value)}
                 className={`px-3 py-2 text-sm font-medium ${
-                  groupBy === opt.value ? "bg-[var(--brand-blue)] text-white" : "bg-white text-gray-700 hover:bg-gray-50"
+                  groupBy === opt.value ? "bg-[var(--brand-blue)] text-white" : "bg-[var(--surface)] text-[var(--text-secondary)] hover:bg-[var(--surface-2)]"
                 }`}
               >
                 {opt.label}
@@ -71,11 +71,11 @@ export function AnalyticsPage() {
           </div>
         </label>
         <label className="text-sm">
-          <span className="mb-1 block font-medium text-gray-700">Project</span>
+          <span className="mb-1 block font-medium text-[var(--text-secondary)]">Project</span>
           <select
             value={projectId}
             onChange={(e) => setProjectId(e.target.value)}
-            className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-900 focus:outline-none"
+            className="rounded-md border border-[var(--border)] px-3 py-2 text-sm focus:border-[var(--brand-blue)] focus:outline-none"
           >
             <option value="">All Projects</option>
             {allProjects.map((p) => (
@@ -87,26 +87,26 @@ export function AnalyticsPage() {
         </label>
       </div>
 
-      <div className="mb-8 rounded-lg border border-gray-200 bg-white p-5">
-        <h2 className="mb-1 text-lg font-semibold text-gray-900">Hours Logged</h2>
-        <p className="mb-4 text-sm text-gray-500">Billable vs non-billable hours over time.</p>
+      <div className="mb-8 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
+        <h2 className="mb-1 text-lg font-semibold text-[var(--text-primary)]">Hours Logged</h2>
+        <p className="mb-4 text-sm text-[var(--text-secondary)]">Billable vs non-billable hours over time.</p>
         <BarChart data={chartData} series={[
-          { key: "billable", label: "Billable", color: "#2a78d6" },
-          { key: "nonBillable", label: "Non-billable", color: "#eb6834" },
+          { key: "billable", label: "Billable", color: "var(--brand-blue)" },
+          { key: "nonBillable", label: "Non-billable", color: "var(--brand-orange)" },
         ]} valueFormatter={(n) => `${n}h`} />
       </div>
 
-      <div className="mb-8 rounded-lg border border-gray-200 bg-white p-5">
-        <h2 className="mb-1 text-lg font-semibold text-gray-900">Budget Utilization by Project</h2>
-        <p className="mb-4 text-sm text-gray-500">Percent of budgeted hours used per project.</p>
+      <div className="mb-8 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
+        <h2 className="mb-1 text-lg font-semibold text-[var(--text-primary)]">Budget Utilization by Project</h2>
+        <p className="mb-4 text-sm text-[var(--text-secondary)]">Percent of budgeted hours used per project.</p>
         <BudgetBarChart data={budgetData} />
       </div>
 
-      <div className="rounded-lg border border-gray-200 bg-white">
-        <h2 className="border-b border-gray-100 px-5 py-4 text-lg font-semibold text-gray-900">Project Details</h2>
+      <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)]">
+        <h2 className="border-b border-[var(--border-subtle)] px-5 py-4 text-lg font-semibold text-[var(--text-primary)]">Project Details</h2>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="border-b border-gray-200 bg-gray-50 text-gray-500">
+            <thead className="border-b border-[var(--border)] bg-[var(--surface-2)] text-[var(--text-secondary)]">
               <tr>
                 <th className="px-4 py-3 font-medium">Project</th>
                 <th className="px-4 py-3 font-medium">Client</th>
@@ -119,25 +119,25 @@ export function AnalyticsPage() {
             </thead>
             <tbody>
               {projectAnalytics?.map((p) => (
-                <tr key={p.id} className="border-b border-gray-100 last:border-0">
-                  <td className="px-4 py-3 font-medium text-gray-900">{p.name}</td>
-                  <td className="px-4 py-3 text-gray-600">{p.clientName}</td>
-                  <td className="px-4 py-3 text-gray-600">{p.budgetHours ?? "—"}</td>
-                  <td className="px-4 py-3 text-gray-600">{p.hoursLogged}h</td>
-                  <td className="px-4 py-3 text-gray-600">
+                <tr key={p.id} className="border-b border-[var(--border-subtle)] last:border-0">
+                  <td className="px-4 py-3 font-medium text-[var(--text-primary)]">{p.name}</td>
+                  <td className="px-4 py-3 text-[var(--text-secondary)]">{p.clientName}</td>
+                  <td className="px-4 py-3 text-[var(--text-secondary)]">{p.budgetHours ?? "—"}</td>
+                  <td className="px-4 py-3 text-[var(--text-secondary)]">{p.hoursLogged}h</td>
+                  <td className="px-4 py-3 text-[var(--text-secondary)]">
                     {p.hoursRemaining !== null ? `${p.hoursRemaining}h` : "—"}
                   </td>
-                  <td className="px-4 py-3 text-gray-600">
+                  <td className="px-4 py-3 text-[var(--text-secondary)]">
                     {p.billableHours}h ({formatCurrency(p.billableAmount)})
                   </td>
-                  <td className="px-4 py-3 text-gray-600">
+                  <td className="px-4 py-3 text-[var(--text-secondary)]">
                     {p.nonBillableHours}h ({formatCurrency(p.nonBillableAmount)})
                   </td>
                 </tr>
               ))}
               {projectAnalytics?.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="px-4 py-6 text-center text-gray-400">
+                  <td colSpan={7} className="px-4 py-6 text-center text-[var(--text-muted)]">
                     No projects yet.
                   </td>
                 </tr>

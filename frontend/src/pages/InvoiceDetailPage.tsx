@@ -8,11 +8,11 @@ import { createCheckoutSession } from "../api/payments";
 const editableStatuses: InvoiceStatus[] = ["DRAFT", "SENT", "OVERDUE", "VOID"];
 
 const statusBadgeStyles: Record<InvoiceStatus, string> = {
-  DRAFT: "bg-gray-100 text-gray-700",
+  DRAFT: "bg-[var(--surface-2)] text-[var(--text-secondary)]",
   SENT: "bg-blue-100 text-blue-800",
   PAID: "bg-green-100 text-green-800",
   OVERDUE: "bg-red-100 text-red-800",
-  VOID: "bg-gray-100 text-gray-400",
+  VOID: "bg-[var(--surface-2)] text-[var(--text-muted)]",
 };
 
 export function InvoiceDetailPage() {
@@ -50,25 +50,25 @@ export function InvoiceDetailPage() {
   });
 
   if (!invoice) {
-    return <p className="text-gray-500">Loading…</p>;
+    return <p className="text-[var(--text-secondary)]">Loading…</p>;
   }
 
   return (
     <div>
       {paymentResult === "success" && (
-        <div className="mb-4 rounded-md bg-green-50 px-3 py-2 text-sm text-green-700">
+        <div className="mb-4 rounded-md bg-[var(--banner-success-bg)] px-3 py-2 text-sm text-[var(--banner-success-text)]">
           Payment received — thank you! It may take a moment to reflect below.
         </div>
       )}
       {paymentResult === "cancelled" && (
-        <div className="mb-4 rounded-md bg-yellow-50 px-3 py-2 text-sm text-yellow-700">
+        <div className="mb-4 rounded-md bg-[var(--banner-warning-bg)] px-3 py-2 text-sm text-[var(--banner-warning-text)]">
           Payment was cancelled. No charge was made.
         </div>
       )}
       <div className="mb-6 flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-900">{invoice.invoiceNumber}</h1>
-          <p className="text-gray-500">
+          <h1 className="text-2xl font-semibold text-[var(--text-primary)]">{invoice.invoiceNumber}</h1>
+          <p className="text-[var(--text-secondary)]">
             {invoice.client.name} · {invoice.client.email} · Due {new Date(invoice.dueDate).toLocaleDateString()}
           </p>
         </div>
@@ -77,7 +77,7 @@ export function InvoiceDetailPage() {
             <select
               value={invoice.status}
               onChange={(e) => statusMutation.mutate(e.target.value as InvoiceStatus)}
-              className="rounded-md border border-gray-300 px-3 py-2 text-sm"
+              className="rounded-md border border-[var(--border)] px-3 py-2 text-sm"
             >
               {editableStatuses.map((s) => (
                 <option key={s} value={s}>
@@ -94,7 +94,7 @@ export function InvoiceDetailPage() {
             href={invoicePdfUrl(invoiceId)}
             target="_blank"
             rel="noreferrer"
-            className="rounded-md border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            className="rounded-md border border-[var(--border)] px-3 py-2 text-sm font-medium text-[var(--text-secondary)] hover:bg-[var(--surface-2)]"
           >
             Download PDF
           </a>
@@ -121,9 +121,9 @@ export function InvoiceDetailPage() {
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white">
+      <div className="overflow-x-auto rounded-lg border border-[var(--border)] bg-[var(--surface)]">
         <table className="w-full text-left text-sm">
-          <thead className="border-b border-gray-200 bg-gray-50 text-gray-500">
+          <thead className="border-b border-[var(--border)] bg-[var(--surface-2)] text-[var(--text-secondary)]">
             <tr>
               <th className="px-4 py-3 font-medium">Description</th>
               <th className="px-4 py-3 font-medium">Hours</th>
@@ -133,26 +133,26 @@ export function InvoiceDetailPage() {
           </thead>
           <tbody>
             {invoice.lineItems?.map((item) => (
-              <tr key={item.id} className="border-b border-gray-100 last:border-0">
-                <td className="px-4 py-3 text-gray-900">{item.description}</td>
-                <td className="px-4 py-3 text-gray-600">{item.hours}</td>
-                <td className="px-4 py-3 text-gray-600">${item.rate}/hr</td>
-                <td className="px-4 py-3 text-gray-600">${item.amount}</td>
+              <tr key={item.id} className="border-b border-[var(--border-subtle)] last:border-0">
+                <td className="px-4 py-3 text-[var(--text-primary)]">{item.description}</td>
+                <td className="px-4 py-3 text-[var(--text-secondary)]">{item.hours}</td>
+                <td className="px-4 py-3 text-[var(--text-secondary)]">${item.rate}/hr</td>
+                <td className="px-4 py-3 text-[var(--text-secondary)]">${item.amount}</td>
               </tr>
             ))}
           </tbody>
         </table>
-        <div className="flex justify-end border-t border-gray-200 bg-gray-50 px-4 py-3 text-sm">
+        <div className="flex justify-end border-t border-[var(--border)] bg-[var(--surface-2)] px-4 py-3 text-sm">
           <div className="w-48 space-y-1">
-            <div className="flex justify-between text-gray-600">
+            <div className="flex justify-between text-[var(--text-secondary)]">
               <span>Subtotal</span>
               <span>${invoice.subtotal}</span>
             </div>
-            <div className="flex justify-between text-gray-600">
+            <div className="flex justify-between text-[var(--text-secondary)]">
               <span>Tax</span>
               <span>${invoice.tax}</span>
             </div>
-            <div className="flex justify-between font-semibold text-gray-900">
+            <div className="flex justify-between font-semibold text-[var(--text-primary)]">
               <span>Total</span>
               <span>${invoice.total}</span>
             </div>

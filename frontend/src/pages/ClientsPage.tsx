@@ -42,7 +42,7 @@ export function ClientsPage() {
   return (
     <div>
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-gray-900">Clients</h1>
+        <h1 className="text-2xl font-semibold text-[var(--text-primary)]">Clients</h1>
         {user?.role === "ADMIN" && (
           <button
             type="button"
@@ -67,11 +67,11 @@ export function ClientsPage() {
       </div>
 
       {isLoading ? (
-        <p className="text-gray-500">Loading…</p>
+        <p className="text-[var(--text-secondary)]">Loading…</p>
       ) : (
-        <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white">
+        <div className="overflow-x-auto rounded-lg border border-[var(--border)] bg-[var(--surface)]">
           <table className="w-full text-left text-sm">
-            <thead className="border-b border-gray-200 bg-gray-50 text-gray-500">
+            <thead className="border-b border-[var(--border)] bg-[var(--surface-2)] text-[var(--text-secondary)]">
               <tr>
                 <th className="px-4 py-3 font-medium">Name</th>
                 <th className="px-4 py-3 font-medium">Company</th>
@@ -81,20 +81,20 @@ export function ClientsPage() {
             </thead>
             <tbody>
               {clients?.map((client) => (
-                <tr key={client.id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50">
+                <tr key={client.id} className="border-b border-[var(--border-subtle)] last:border-0 hover:bg-[var(--surface-2)]">
                   <td className="px-4 py-3">
-                    <Link to={`/clients/${client.id}`} className="font-medium text-gray-900 hover:underline">
+                    <Link to={`/clients/${client.id}`} className="font-medium text-[var(--text-primary)] hover:underline">
                       {client.name}
                     </Link>
                   </td>
-                  <td className="px-4 py-3 text-gray-600">{client.company ?? "—"}</td>
-                  <td className="px-4 py-3 text-gray-600">{client.email}</td>
-                  <td className="px-4 py-3 text-gray-600">${client.hourlyRate}/hr</td>
+                  <td className="px-4 py-3 text-[var(--text-secondary)]">{client.company ?? "—"}</td>
+                  <td className="px-4 py-3 text-[var(--text-secondary)]">{client.email}</td>
+                  <td className="px-4 py-3 text-[var(--text-secondary)]">${client.hourlyRate}/hr</td>
                 </tr>
               ))}
               {clients?.length === 0 && (
                 <tr>
-                  <td colSpan={4} className="px-4 py-6 text-center text-gray-400">
+                  <td colSpan={4} className="px-4 py-6 text-center text-[var(--text-muted)]">
                     No clients yet.
                   </td>
                 </tr>
@@ -107,7 +107,7 @@ export function ClientsPage() {
       {showCreate && (
         <Modal title="New Client" onClose={() => setShowCreate(false)}>
           <form onSubmit={handleCreate}>
-            {error && <div className="mb-3 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{error}</div>}
+            {error && <div className="mb-3 rounded-md bg-[var(--banner-error-bg)] px-3 py-2 text-sm text-[var(--banner-error-text)]">{error}</div>}
             <FormField label="Name" required value={name} onChange={(e) => setName(e.target.value)} />
             <FormField label="Email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
             <FormField label="Company" value={company} onChange={(e) => setCompany(e.target.value)} />

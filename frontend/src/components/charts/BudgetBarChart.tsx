@@ -6,12 +6,12 @@ export interface BudgetBarDatum {
 function colorFor(pct: number): string {
   if (pct >= 100) return "#d03b3b";
   if (pct >= 90) return "#fab219";
-  return "#2a78d6";
+  return "var(--brand-blue)";
 }
 
 export function BudgetBarChart({ data }: { data: BudgetBarDatum[] }) {
   if (data.length === 0) {
-    return <p className="py-8 text-center text-sm text-gray-400">No projects with a budget set yet.</p>;
+    return <p className="py-8 text-center text-sm text-[var(--text-muted)]">No projects with a budget set yet.</p>;
   }
 
   return (
@@ -22,10 +22,10 @@ export function BudgetBarChart({ data }: { data: BudgetBarDatum[] }) {
         return (
           <div key={d.label}>
             <div className="mb-1 flex items-center justify-between text-sm">
-              <span className="font-medium text-gray-900">{d.label}</span>
-              <span className="text-gray-600">{d.percentUsed}%</span>
+              <span className="font-medium text-[var(--text-primary)]">{d.label}</span>
+              <span className="text-[var(--text-secondary)]">{d.percentUsed}%</span>
             </div>
-            <div className="h-2.5 w-full overflow-hidden rounded-full bg-gray-100">
+            <div className="h-2.5 w-full overflow-hidden rounded-full bg-[var(--surface-2)]">
               <div className="h-full rounded-full" style={{ width: `${width}%`, backgroundColor: color }} />
             </div>
           </div>

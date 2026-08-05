@@ -39,7 +39,7 @@ export function BarChart({
   return (
     <div className="w-full">
       {series.length > 1 && (
-        <div className="mb-3 flex items-center gap-4 text-xs text-gray-600">
+        <div className="mb-3 flex items-center gap-4 text-xs text-[var(--text-secondary)]">
           {series.map((s) => (
             <div key={s.key} className="flex items-center gap-1.5">
               <span className="inline-block h-2.5 w-2.5 rounded-sm" style={{ backgroundColor: s.color }} />
@@ -55,7 +55,7 @@ export function BarChart({
           viewBox={`0 0 ${width} ${axisY + 32}`}
           className="min-w-full"
         >
-          <line x1={0} y1={axisY} x2={width} y2={axisY} stroke="#c3c2b7" strokeWidth={1} />
+          <line x1={0} y1={axisY} x2={width} y2={axisY} stroke="var(--chart-axis)" strokeWidth={1} />
           {data.map((d, i) => {
             const x = i * barSlot + (barSlot - barWidth) / 2;
             let yCursor = axisY;
@@ -94,12 +94,12 @@ export function BarChart({
                     />
                   ) : null
                 )}
-                <text x={x + barWidth / 2} y={axisY + 18} textAnchor="middle" fontSize={11} fill="#898781">
+                <text x={x + barWidth / 2} y={axisY + 18} textAnchor="middle" fontSize={11} fill="var(--chart-muted)">
                   {d.label}
                 </text>
                 {isHover && (
                   <g>
-                    <rect x={tooltipX} y={tooltipY} width={140} height={tooltipHeight} rx={6} fill="#0b0b0b" />
+                    <rect x={tooltipX} y={tooltipY} width={140} height={tooltipHeight} rx={6} fill="var(--chart-tooltip-bg)" />
                     <text x={tooltipX + 8} y={tooltipY + 16} fontSize={11} fontWeight={600} fill="#ffffff">
                       {d.label}: {valueFormatter(total)}
                     </text>
@@ -110,7 +110,7 @@ export function BarChart({
                           x={tooltipX + 8}
                           y={tooltipY + 16 + (si + 1) * 16}
                           fontSize={10}
-                          fill="#c3c2b7"
+                          fill="var(--chart-tooltip-text-secondary)"
                         >
                           {series[si].label}: {valueFormatter(seg.value)}
                         </text>
@@ -122,7 +122,7 @@ export function BarChart({
           })}
         </svg>
       </div>
-      {data.length === 0 && <p className="py-8 text-center text-sm text-gray-400">No data yet.</p>}
+      {data.length === 0 && <p className="py-8 text-center text-sm text-[var(--text-muted)]">No data yet.</p>}
     </div>
   );
 }

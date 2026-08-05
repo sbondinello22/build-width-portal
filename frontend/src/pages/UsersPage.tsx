@@ -37,7 +37,7 @@ function AddUserModal({ onClose }: { onClose: () => void }) {
   return (
     <Modal title="Add User" onClose={onClose}>
       <form onSubmit={handleSubmit}>
-        {error && <div className="mb-3 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{error}</div>}
+        {error && <div className="mb-3 rounded-md bg-[var(--banner-error-bg)] px-3 py-2 text-sm text-[var(--banner-error-text)]">{error}</div>}
         <FormField label="Name" required value={name} onChange={(e) => setName(e.target.value)} />
         <FormField label="Email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
         <FormField
@@ -49,11 +49,11 @@ function AddUserModal({ onClose }: { onClose: () => void }) {
           onChange={(e) => setPassword(e.target.value)}
         />
         <label className="mb-3 block text-sm">
-          <span className="mb-1 block font-medium text-gray-700">Role</span>
+          <span className="mb-1 block font-medium text-[var(--text-secondary)]">Role</span>
           <select
             value={role}
             onChange={(e) => setRole(e.target.value as Role)}
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-900 focus:outline-none"
+            className="w-full rounded-md border border-[var(--border)] px-3 py-2 text-sm focus:border-[var(--brand-blue)] focus:outline-none"
           >
             <option value="EMPLOYEE">Employee</option>
             <option value="ADMIN">Admin</option>
@@ -86,7 +86,7 @@ export function UsersPage() {
   return (
     <div>
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-gray-900">Users</h1>
+        <h1 className="text-2xl font-semibold text-[var(--text-primary)]">Users</h1>
         <button
           type="button"
           onClick={() => setShowAdd(true)}
@@ -97,11 +97,11 @@ export function UsersPage() {
       </div>
 
       {isLoading ? (
-        <p className="text-gray-500">Loading…</p>
+        <p className="text-[var(--text-secondary)]">Loading…</p>
       ) : (
-        <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white">
+        <div className="overflow-x-auto rounded-lg border border-[var(--border)] bg-[var(--surface)]">
           <table className="w-full text-left text-sm">
-            <thead className="border-b border-gray-200 bg-gray-50 text-gray-500">
+            <thead className="border-b border-[var(--border)] bg-[var(--surface-2)] text-[var(--text-secondary)]">
               <tr>
                 <th className="px-4 py-3 font-medium">Name</th>
                 <th className="px-4 py-3 font-medium">Email</th>
@@ -112,12 +112,12 @@ export function UsersPage() {
             </thead>
             <tbody>
               {users?.map((u) => (
-                <tr key={u.id} className="border-b border-gray-100 last:border-0">
-                  <td className="px-4 py-3 font-medium text-gray-900">
+                <tr key={u.id} className="border-b border-[var(--border-subtle)] last:border-0">
+                  <td className="px-4 py-3 font-medium text-[var(--text-primary)]">
                     {u.name}
-                    {u.id === currentUser?.id && <span className="ml-2 text-xs text-gray-400">(you)</span>}
+                    {u.id === currentUser?.id && <span className="ml-2 text-xs text-[var(--text-muted)]">(you)</span>}
                   </td>
-                  <td className="px-4 py-3 text-gray-600">{u.email}</td>
+                  <td className="px-4 py-3 text-[var(--text-secondary)]">{u.email}</td>
                   <td className="px-4 py-3">
                     <span className={`rounded-full px-2 py-1 text-xs font-medium ${roleStyles[u.role]}`}>
                       {u.role}
@@ -126,7 +126,7 @@ export function UsersPage() {
                   <td className="px-4 py-3">
                     <span
                       className={`rounded-full px-2 py-1 text-xs font-medium ${
-                        u.active ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-500"
+                        u.active ? "bg-green-100 text-green-800" : "bg-[var(--surface-2)] text-[var(--text-secondary)]"
                       }`}
                     >
                       {u.active ? "Active" : "Deactivated"}
@@ -151,7 +151,7 @@ export function UsersPage() {
               ))}
               {users?.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-4 py-6 text-center text-gray-400">
+                  <td colSpan={5} className="px-4 py-6 text-center text-[var(--text-muted)]">
                     No users yet.
                   </td>
                 </tr>

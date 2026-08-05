@@ -26,7 +26,7 @@ export function SearchJump({ items, placeholder }: { items: SearchJumpItem[]; pl
           width="16"
           height="16"
           viewBox="0 0 16 16"
-          className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+          className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]"
         >
           <circle cx="7" cy="7" r="5" stroke="currentColor" strokeWidth="1.5" fill="none" />
           <path d="M11 11l3.5 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
@@ -40,23 +40,23 @@ export function SearchJump({ items, placeholder }: { items: SearchJumpItem[]; pl
           onFocus={() => setOpen(true)}
           onBlur={() => setTimeout(() => setOpen(false), 150)}
           placeholder={placeholder}
-          className="w-full rounded-md border border-gray-300 py-2 pl-9 pr-3 text-sm focus:border-gray-900 focus:outline-none"
+          className="w-full rounded-md border border-[var(--border)] py-2 pl-9 pr-3 text-sm focus:border-[var(--brand-blue)] focus:outline-none"
         />
       </div>
       {open && trimmed && (
-        <div className="absolute left-0 top-full z-20 mt-1 w-full max-w-sm rounded-md border border-gray-200 bg-white py-1 shadow-lg">
+        <div className="absolute left-0 top-full z-20 mt-1 w-full max-w-sm rounded-md border border-[var(--border)] bg-[var(--surface)] py-1 shadow-lg">
           {matches.length === 0 ? (
-            <p className="px-3 py-2 text-sm text-gray-400">No matches.</p>
+            <p className="px-3 py-2 text-sm text-[var(--text-muted)]">No matches.</p>
           ) : (
             matches.map((item) => (
               <Link
                 key={item.id}
                 to={item.to}
-                className="block px-3 py-2 text-sm hover:bg-gray-50"
+                className="block px-3 py-2 text-sm hover:bg-[var(--surface-2)]"
                 onClick={() => setQuery("")}
               >
-                <div className="font-medium text-gray-900">{item.label}</div>
-                {item.sublabel && <div className="text-gray-500">{item.sublabel}</div>}
+                <div className="font-medium text-[var(--text-primary)]">{item.label}</div>
+                {item.sublabel && <div className="text-[var(--text-secondary)]">{item.sublabel}</div>}
               </Link>
             ))
           )}
