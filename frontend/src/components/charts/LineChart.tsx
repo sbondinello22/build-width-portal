@@ -115,9 +115,20 @@ export function LineChart({
             return (
               <g key={d.label} onMouseEnter={() => setHover(i)} onMouseLeave={() => setHover(null)} style={{ cursor: "default" }}>
                 <rect x={x - colSlot / 2} y={0} width={colSlot} height={axisY} fill="transparent" />
-                {series.map((s) => {
+                {series.map((s, si) => {
                   const y = pointY(d.values[s.key] ?? 0);
-                  return <circle key={s.key} cx={x} cy={y} r={isHover ? 4.5 : 3} fill={s.color} stroke="var(--surface)" strokeWidth={1.5} />;
+                  const dotOffset = series.length > 1 ? (si - (series.length - 1) / 2) * 5 : 0;
+                  return (
+                    <circle
+                      key={s.key}
+                      cx={x + dotOffset}
+                      cy={y}
+                      r={isHover ? 4.5 : 3}
+                      fill={s.color}
+                      stroke="var(--surface)"
+                      strokeWidth={1.5}
+                    />
+                  );
                 })}
                 <text x={x} y={axisY + 18} textAnchor="middle" fontSize={11} fill="var(--chart-muted)">
                   {d.label}
