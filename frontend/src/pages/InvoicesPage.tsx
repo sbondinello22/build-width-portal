@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "../context/AuthContext";
@@ -14,10 +15,25 @@ import { statusStyles, openStatuses, closedStatuses, monthNames } from "../lib/i
 
 type StatusTab = "all" | "open" | "closed";
 
+interface CustomLineItem {
+  id: string;
+  description: string;
+  hours: number;
+  amount: number;
+}
+
+function formatCurrencyShort(n: number) {
+  return `$${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
 function GenerateInvoiceModal({ onClose }: { onClose: () => void }) {
   const queryClient = useQueryClient();
   const [clientId, setClientId] = useState("");
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [customLineItems, setCustomLineItems] = useState<CustomLineItem[]>([]);
+  const [description, setDescription] = useState("");
+  const [total, setTotal] = useState("");
+  const [hours, setHours] = useState("");
 
   const { data: clients } = useQuery({ queryKey: ["clients"], queryFn: listClients });
   const { data: projects } = useQuery({
@@ -41,9 +57,15 @@ function GenerateInvoiceModal({ onClose }: { onClose: () => void }) {
   );
 
   const generateMutation = useMutation({
-    mutationFn: () => generateInvoice({ clientId, timeEntryIds: Array.from(selected) }),
+    mutationFn: () =>
+      generateInvoice({
+        clientId,
+        timeEntryIds: Array.from(selected),
+        customLineItems: customLineItems.map(({ description, hours, amount }) => ({ description, hours, amount })),
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["invoices"] });
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
       onClose();
     },
   });
@@ -56,6 +78,25 @@ function GenerateInvoiceModal({ onClose }: { onClose: () => void }) {
       return next;
     });
   }
+
+  const computedRate = total && hours && Number(hours) > 0 ? Number(total) / Number(hours) : null;
+
+  function addLineItem() {
+    if (!description.trim() || computedRate === null) return;
+    setCustomLineItems((prev) => [
+      ...prev,
+      { id: crypto.randomUUID(), description: description.trim(), hours: Number(hours), amount: Number(total) },
+    ]);
+    setDescription("");
+    setTotal("");
+    setHours("");
+  }
+
+  function removeLineItem(id: string) {
+    setCustomLineItems((prev) => prev.filter((li) => li.id !== id));
+  }
+
+  const totalItemCount = selected.size + customLineItems.length;
 
   return (
     <Modal title="Generate Invoice" onClose={onClose}>
@@ -79,32 +120,119 @@ function GenerateInvoiceModal({ onClose }: { onClose: () => void }) {
       </label>
 
       {clientId && (
-        <div className="mb-4 max-h-64 overflow-y-auto rounded-md border border-[var(--border)]">
-          {billableEntries.length === 0 ? (
-            <p className="p-3 text-sm text-[var(--text-muted)]">No unbilled time entries for this client.</p>
-          ) : (
-            billableEntries.map((entry) => (
-              <label key={entry.id} className="flex items-center gap-2 border-b border-[var(--border-subtle)] px-3 py-2 text-sm last:border-0">
-                <input type="checkbox" checked={selected.has(entry.id)} onChange={() => toggle(entry.id)} />
-                <span className="flex-1">
-                  {entry.projectName} — {entry.description || "(no description)"}
-                </span>
-                <span className="text-[var(--text-secondary)]">{((entry.durationMinutes ?? 0) / 60).toFixed(2)}h</span>
-              </label>
-            ))
-          )}
-        </div>
+        <>
+          <span className="mb-1 block text-sm font-medium text-[var(--text-secondary)]">Unbilled time entries</span>
+          <div className="mb-4 max-h-52 overflow-y-auto rounded-md border border-[var(--border)]">
+            {billableEntries.length === 0 ? (
+              <p className="p-3 text-sm text-[var(--text-muted)]">No unbilled time entries for this client.</p>
+            ) : (
+              billableEntries.map((entry) => (
+                <label key={entry.id} className="flex items-center gap-2 border-b border-[var(--border-subtle)] px-3 py-2 text-sm last:border-0">
+                  <input type="checkbox" checked={selected.has(entry.id)} onChange={() => toggle(entry.id)} />
+                  <span className="flex-1">
+                    {entry.projectName} — {entry.description || "(no description)"}
+                  </span>
+                  <span className="text-[var(--text-secondary)]">{((entry.durationMinutes ?? 0) / 60).toFixed(2)}h</span>
+                </label>
+              ))
+            )}
+          </div>
+
+          <div className="mb-4 rounded-md border border-[var(--border)] p-3">
+            <span className="mb-2 block text-sm font-medium text-[var(--text-secondary)]">
+              Add a custom line item (work completed)
+            </span>
+
+            {customLineItems.length > 0 && (
+              <div className="mb-3 space-y-1.5">
+                {customLineItems.map((li) => (
+                  <div key={li.id} className="flex items-center gap-2 rounded-md bg-[var(--surface-2)] px-2.5 py-1.5 text-sm">
+                    <span className="flex-1">{li.description}</span>
+                    <span className="text-[var(--text-secondary)]">
+                      {li.hours}h · {formatCurrencyShort(li.amount)} ({formatCurrencyShort(li.amount / li.hours)}/hr)
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => removeLineItem(li.id)}
+                      className="text-[var(--text-muted)] hover:text-red-500"
+                      aria-label="Remove line item"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="mb-2">
+              <FormFieldLike label="Description of work completed">
+                <input
+                  type="text"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="e.g. Homepage redesign consultation"
+                  className="w-full rounded-md border border-[var(--border)] px-3 py-2 text-sm focus:border-[var(--brand-blue)] focus:outline-none"
+                />
+              </FormFieldLike>
+            </div>
+            <div className="mb-2 grid grid-cols-2 gap-2">
+              <FormFieldLike label="Total ($)">
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={total}
+                  onChange={(e) => setTotal(e.target.value)}
+                  className="w-full rounded-md border border-[var(--border)] px-3 py-2 text-sm focus:border-[var(--brand-blue)] focus:outline-none"
+                />
+              </FormFieldLike>
+              <FormFieldLike label="Hours">
+                <input
+                  type="number"
+                  min="0"
+                  step="any"
+                  value={hours}
+                  onChange={(e) => setHours(e.target.value)}
+                  className="w-full rounded-md border border-[var(--border)] px-3 py-2 text-sm focus:border-[var(--brand-blue)] focus:outline-none"
+                />
+              </FormFieldLike>
+            </div>
+            <div className="mb-3 rounded-md bg-[var(--surface-2)] px-3 py-2 text-sm text-[var(--text-secondary)]">
+              Effective rate:{" "}
+              <span className="font-semibold text-[var(--text-primary)]">
+                {computedRate !== null ? `${formatCurrencyShort(computedRate)}/hr` : "—"}
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={addLineItem}
+              disabled={!description.trim() || computedRate === null}
+              className="w-full rounded-md border border-[var(--border)] px-3 py-2 text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--surface-2)] disabled:opacity-50"
+            >
+              Add Line Item
+            </button>
+          </div>
+        </>
       )}
 
       <button
         type="button"
-        disabled={selected.size === 0 || generateMutation.isPending}
+        disabled={totalItemCount === 0 || generateMutation.isPending}
         onClick={() => generateMutation.mutate()}
         className="w-full rounded-md bg-[var(--brand-blue)] px-3 py-2 text-sm font-medium text-white hover:bg-[var(--brand-blue-dark)] disabled:opacity-50"
       >
-        {generateMutation.isPending ? "Generating…" : `Generate Invoice (${selected.size} entries)`}
+        {generateMutation.isPending ? "Generating…" : `Generate Invoice (${totalItemCount} item${totalItemCount === 1 ? "" : "s"})`}
       </button>
     </Modal>
+  );
+}
+
+function FormFieldLike({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <label className="block text-sm">
+      <span className="mb-1 block font-medium text-[var(--text-secondary)]">{label}</span>
+      {children}
+    </label>
   );
 }
 

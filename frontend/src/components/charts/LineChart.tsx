@@ -37,7 +37,7 @@ export function LineChart({
   valueFormatter?: (n: number) => string;
   axisLabel?: string;
 }) {
-  const [hover, setHover] = useState<number | null>(null);
+  const [hover, setHover] = useState<{ i: number; si: number } | null>(null);
 
   const allValues = data.flatMap((d) => series.map((s) => d.values[s.key] ?? 0));
   const rawMax = Math.max(1, ...allValues);
@@ -51,7 +51,7 @@ export function LineChart({
   const chartHeight = height;
   const axisY = TOP_PAD + chartHeight;
   const colSlot = plotWidth / Math.max(1, data.length - 1 || 1);
-  const tooltipHeight = series.length > 1 ? 20 + series.length * 16 : 36;
+  const tooltipHeight = 30;
 
   function pointX(i: number) {
     return data.length === 1 ? leftPad + plotWidth / 2 : leftPad + i * colSlot;
@@ -63,26 +63,13 @@ export function LineChart({
     return axisY - (value / max) * (chartHeight - 12) + seriesOffset(si);
   }
 
-  const DASH_PATTERNS = ["none", "6 4", "1.5 3.5", "9 3 2 3"];
-
   return (
     <div className="w-full">
       {series.length > 1 && (
         <div className="mb-3 flex items-center gap-4 text-xs text-[var(--text-secondary)]">
-          {series.map((s, si) => (
+          {series.map((s) => (
             <div key={s.key} className="flex items-center gap-1.5">
-              <svg width={18} height={8} className="shrink-0">
-                <line
-                  x1={0}
-                  y1={4}
-                  x2={18}
-                  y2={4}
-                  stroke={s.color}
-                  strokeWidth={2}
-                  strokeDasharray={DASH_PATTERNS[si % DASH_PATTERNS.length] === "none" ? undefined : DASH_PATTERNS[si % DASH_PATTERNS.length]}
-                  strokeLinecap="round"
-                />
-              </svg>
+              <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ backgroundColor: s.color }} />
               {s.label}
             </div>
           ))}
@@ -119,63 +106,46 @@ export function LineChart({
 
           {series.map((s, si) => {
             const points = data.map((d, i) => `${pointX(i)},${pointY(d.values[s.key] ?? 0, si)}`).join(" ");
-            const dash = DASH_PATTERNS[si % DASH_PATTERNS.length];
-            return (
-              <polyline
-                key={s.key}
-                points={points}
-                fill="none"
-                stroke={s.color}
-                strokeWidth={2}
-                strokeDasharray={dash === "none" ? undefined : dash}
-                strokeLinejoin="round"
-                strokeLinecap="round"
-              />
-            );
+            return <polyline key={s.key} points={points} fill="none" stroke={s.color} strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />;
           })}
 
-          {data.map((d, i) => {
-            const x = pointX(i);
-            const isHover = hover === i;
-            const tooltipX = Math.min(Math.max(x - 70, leftPad + 4), width - 144);
-            const tooltipY = Math.max(4, TOP_PAD - tooltipHeight - 4);
+          {data.map((d, i) => (
+            <text key={d.label} x={pointX(i)} y={axisY + 18} textAnchor="middle" fontSize={11} fill="var(--chart-muted)">
+              {d.label}
+            </text>
+          ))}
 
-            return (
-              <g key={d.label} onMouseEnter={() => setHover(i)} onMouseLeave={() => setHover(null)} style={{ cursor: "default" }}>
-                <rect x={x - colSlot / 2} y={0} width={colSlot} height={axisY} fill="transparent" />
-                {series.map((s, si) => {
-                  const y = pointY(d.values[s.key] ?? 0, si);
-                  return (
-                    <circle
-                      key={s.key}
-                      cx={x}
-                      cy={y}
-                      r={isHover ? 4.5 : 3}
-                      fill={s.color}
-                      stroke="var(--surface)"
-                      strokeWidth={1.5}
-                    />
-                  );
-                })}
-                <text x={x} y={axisY + 18} textAnchor="middle" fontSize={11} fill="var(--chart-muted)">
-                  {d.label}
-                </text>
-                {isHover && (
-                  <g>
-                    <rect x={tooltipX} y={tooltipY} width={140} height={tooltipHeight} rx={6} fill="var(--chart-tooltip-bg)" />
-                    <text x={tooltipX + 8} y={tooltipY + 16} fontSize={11} fontWeight={600} fill="#ffffff">
-                      {d.label}
-                    </text>
-                    {series.map((s, si) => (
-                      <text key={s.key} x={tooltipX + 8} y={tooltipY + 16 + (si + 1) * 16} fontSize={10} fill="var(--chart-tooltip-text-secondary)">
-                        {s.label}: {valueFormatter(d.values[s.key] ?? 0)}
+          {data.map((d, i) =>
+            series.map((s, si) => {
+              const x = pointX(i);
+              const y = pointY(d.values[s.key] ?? 0, si);
+              const isHover = hover?.i === i && hover?.si === si;
+              const tooltipText = `${d.label} · ${s.label}: ${valueFormatter(d.values[s.key] ?? 0)}`;
+              const tooltipWidth = Math.min(260, Math.max(90, tooltipText.length * 5.6 + 16));
+              const tooltipX = Math.min(Math.max(x - tooltipWidth / 2, leftPad + 2), width - tooltipWidth - 2);
+              const tooltipY = Math.max(2, y - tooltipHeight - 8);
+
+              return (
+                <g
+                  key={`${d.label}-${s.key}`}
+                  onMouseEnter={() => setHover({ i, si })}
+                  onMouseLeave={() => setHover(null)}
+                  style={{ cursor: "default" }}
+                >
+                  <circle cx={x} cy={y} r={9} fill="transparent" />
+                  <circle cx={x} cy={y} r={isHover ? 5 : 3} fill={s.color} stroke="var(--surface)" strokeWidth={1.5} />
+                  {isHover && (
+                    <g>
+                      <rect x={tooltipX} y={tooltipY} width={tooltipWidth} height={tooltipHeight} rx={6} fill="var(--chart-tooltip-bg)" />
+                      <text x={tooltipX + tooltipWidth / 2} y={tooltipY + 19} textAnchor="middle" fontSize={11} fontWeight={600} fill="#ffffff">
+                        {tooltipText}
                       </text>
-                    ))}
-                  </g>
-                )}
-              </g>
-            );
-          })}
+                    </g>
+                  )}
+                </g>
+              );
+            })
+          )}
         </svg>
       </div>
       {data.length === 0 && <p className="py-8 text-center text-sm text-[var(--text-muted)]">No data yet.</p>}

@@ -53,7 +53,14 @@ export async function generateInvoice(input: GenerateInvoiceInput, createdById: 
     else byProject.set(entry.projectId, { project: entry.project, entries: [entry] });
   }
 
-  const lineItemsData = Array.from(byProject.values()).map(({ project, entries: projectEntries }) => {
+  const lineItemsData: {
+    projectId: string | null;
+    description: string;
+    hours: number;
+    rate: number;
+    amount: number;
+    entryIds: string[];
+  }[] = Array.from(byProject.values()).map(({ project, entries: projectEntries }) => {
     const totalMinutes = projectEntries.reduce((sum, e) => sum + (e.durationMinutes ?? 0), 0);
     const hours = Math.round((totalMinutes / 60) * 100) / 100;
     const rate = Number(project.rate);
@@ -67,6 +74,17 @@ export async function generateInvoice(input: GenerateInvoiceInput, createdById: 
       entryIds: projectEntries.map((e) => e.id),
     };
   });
+
+  for (const custom of input.customLineItems) {
+    lineItemsData.push({
+      projectId: null,
+      description: custom.description,
+      hours: custom.hours,
+      rate: Math.round((custom.amount / custom.hours) * 100) / 100,
+      amount: custom.amount,
+      entryIds: [],
+    });
+  }
 
   const settings = await getSettings();
   const subtotal = Math.round(lineItemsData.reduce((sum, li) => sum + li.amount, 0) * 100) / 100;

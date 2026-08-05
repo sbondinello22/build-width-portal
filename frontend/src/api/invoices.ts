@@ -35,7 +35,11 @@ export async function getInvoice(id: string) {
   return data.invoice;
 }
 
-export async function generateInvoice(input: { clientId: string; timeEntryIds: string[] }) {
+export async function generateInvoice(input: {
+  clientId: string;
+  timeEntryIds: string[];
+  customLineItems?: { description: string; hours: number; amount: number }[];
+}) {
   const { data } = await api.post<{ invoice: Invoice }>("/invoices/generate", input);
   return data.invoice;
 }
