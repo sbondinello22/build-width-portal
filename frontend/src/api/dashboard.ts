@@ -4,7 +4,8 @@ export interface DashboardSummary {
   outstandingBalance: number;
   overdueCount: number;
   overdueAmount: number;
-  hoursThisMonth: number;
+  billableHoursThisMonth: number;
+  billableHoursThisWeek: number;
 }
 
 export interface ActivityEntry {

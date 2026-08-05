@@ -92,6 +92,13 @@ export async function getProjectAnalytics(params: { clientId?: string }) {
     const percentUsed =
       budgetHours !== null && budgetHours > 0 ? Math.min(100, Math.round((hoursLogged / budgetHours) * 100)) : null;
 
+    const budgetAmount = budgetHours !== null ? Math.round(budgetHours * rate * 100) / 100 : null;
+    const amountUsed = Math.round(hoursLogged * rate * 100) / 100;
+    const amountRemaining = budgetAmount !== null ? Math.round((budgetAmount - amountUsed) * 100) / 100 : null;
+    const billableAmount = Math.round(billableHours * rate * 100) / 100;
+    const percentCostUsed =
+      budgetAmount !== null && budgetAmount > 0 ? Math.min(100, Math.round((billableAmount / budgetAmount) * 100)) : null;
+
     return {
       id: project.id,
       name: project.name,
@@ -103,8 +110,12 @@ export async function getProjectAnalytics(params: { clientId?: string }) {
       hoursLogged: Math.round(hoursLogged * 100) / 100,
       hoursRemaining,
       percentUsed,
+      percentCostUsed,
+      budgetAmount,
+      amountUsed,
+      amountRemaining,
       billableHours: Math.round(billableHours * 100) / 100,
-      billableAmount: Math.round(billableHours * rate * 100) / 100,
+      billableAmount,
       nonBillableHours: Math.round(nonBillableHours * 100) / 100,
       nonBillableAmount: Math.round(nonBillableHours * rate * 100) / 100,
     };

@@ -46,7 +46,15 @@ export function AnalyticsPage() {
 
   const budgetData = (projectAnalytics ?? [])
     .filter((p) => p.percentUsed !== null)
-    .map((p) => ({ label: p.name, percentUsed: p.percentUsed! }));
+    .map((p) => ({
+      label: p.name,
+      percentHoursUsed: p.percentUsed!,
+      hoursLogged: p.hoursLogged,
+      budgetHours: p.budgetHours!,
+      percentCostUsed: p.percentCostUsed!,
+      billableAmount: p.billableAmount,
+      budgetAmount: p.budgetAmount!,
+    }));
 
   return (
     <div>
@@ -98,7 +106,9 @@ export function AnalyticsPage() {
 
       <div className="mb-8 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
         <h2 className="mb-1 text-lg font-semibold text-[var(--text-primary)]">Budget Utilization by Project</h2>
-        <p className="mb-4 text-sm text-[var(--text-secondary)]">Percent of budgeted hours used per project.</p>
+        <p className="mb-4 text-sm text-[var(--text-secondary)]">
+          Hours and cost used against budget per project.
+        </p>
         <BudgetBarChart data={budgetData} />
       </div>
 

@@ -20,6 +20,10 @@ export interface ProjectAnalytics {
   hoursLogged: number;
   hoursRemaining: number | null;
   percentUsed: number | null;
+  percentCostUsed: number | null;
+  budgetAmount: number | null;
+  amountUsed: number;
+  amountRemaining: number | null;
   billableHours: number;
   billableAmount: number;
   nonBillableHours: number;

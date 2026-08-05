@@ -5,6 +5,27 @@ interface RequestingUser {
   role: "ADMIN" | "EMPLOYEE";
 }
 
+function startOfWeek(date: Date): Date {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = day === 0 ? -6 : 1 - day;
+  d.setDate(d.getDate() + diff);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+async function sumBillableHours(requester: RequestingUser, since: Date): Promise<number> {
+  const entries = await prisma.timeEntry.findMany({
+    where: {
+      startedAt: { gte: since },
+      billable: true,
+      ...(requester.role === "EMPLOYEE" ? { userId: requester.id } : {}),
+    },
+    select: { durationMinutes: true },
+  });
+  return Math.round((entries.reduce((sum, e) => sum + (e.durationMinutes ?? 0), 0) / 60) * 100) / 100;
+}
+
 export async function getSummary(requester: RequestingUser) {
   const outstandingInvoices = await prisma.invoice.findMany({
     where: { status: { in: ["SENT", "OVERDUE"] } },
@@ -21,21 +42,17 @@ export async function getSummary(requester: RequestingUser) {
   startOfMonth.setDate(1);
   startOfMonth.setHours(0, 0, 0, 0);
 
-  const timeEntries = await prisma.timeEntry.findMany({
-    where: {
-      startedAt: { gte: startOfMonth },
-      ...(requester.role === "EMPLOYEE" ? { userId: requester.id } : {}),
-    },
-    select: { durationMinutes: true },
-  });
-  const hoursThisMonth =
-    Math.round((timeEntries.reduce((sum, e) => sum + (e.durationMinutes ?? 0), 0) / 60) * 100) / 100;
+  const [billableHoursThisMonth, billableHoursThisWeek] = await Promise.all([
+    sumBillableHours(requester, startOfMonth),
+    sumBillableHours(requester, startOfWeek(new Date())),
+  ]);
 
   return {
     outstandingBalance: Math.round(outstandingBalance * 100) / 100,
     overdueCount: overdueInvoices.length,
     overdueAmount: Math.round(overdueAmount * 100) / 100,
-    hoursThisMonth,
+    billableHoursThisMonth,
+    billableHoursThisWeek,
   };
 }
 

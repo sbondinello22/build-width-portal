@@ -23,6 +23,7 @@ export function DashboardPage() {
           label="Outstanding Balance"
           value={summary ? formatCurrency(summary.outstandingBalance) : "…"}
           accent="blue"
+          to="/invoices"
         />
         <StatTile
           label="Overdue Invoices"
@@ -37,9 +38,11 @@ export function DashboardPage() {
           accent="orange"
         />
         <StatTile
-          label="Hours This Month"
-          value={summary ? `${summary.hoursThisMonth}h` : "…"}
+          label="Billable Hours (This Month)"
+          value={summary ? `${summary.billableHoursThisMonth}h` : "…"}
+          secondary={summary ? `${summary.billableHoursThisWeek}h this week` : undefined}
           accent="violet"
+          to="/analytics"
         />
       </div>
 

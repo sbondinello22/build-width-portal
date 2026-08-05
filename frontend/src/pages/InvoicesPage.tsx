@@ -157,6 +157,13 @@ export function InvoicesPage() {
     return { label, values: { paid: Math.round(paid * 100) / 100, open: Math.round(open * 100) / 100 } };
   });
 
+  const totalPaid = monthlyData.reduce((sum, m) => sum + m.values.paid, 0);
+  const totalOpen = monthlyData.reduce((sum, m) => sum + m.values.open, 0);
+
+  function formatCurrency(n: number) {
+    return `$${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  }
+
   const tabs: { key: StatusTab; label: string }[] = [
     { key: "all", label: "All" },
     { key: "open", label: "Open" },
@@ -208,14 +215,34 @@ export function InvoicesPage() {
             ))}
           </select>
         </div>
-        <BarChart
-          data={monthlyData}
-          series={[
-            { key: "paid", label: "Paid", color: "#0ca30c" },
-            { key: "open", label: "Open", color: "var(--brand-blue)" },
-          ]}
-          valueFormatter={(n) => `$${n.toLocaleString()}`}
-        />
+        <div className="flex flex-col gap-6 lg:flex-row">
+          <div className="min-w-0 flex-1">
+            <BarChart
+              data={monthlyData}
+              series={[
+                { key: "paid", label: "Paid", color: "#0ca30c" },
+                { key: "open", label: "Open", color: "var(--brand-blue)" },
+              ]}
+              valueFormatter={(n) => `$${n.toLocaleString()}`}
+            />
+          </div>
+          <div className="flex shrink-0 flex-row gap-3 lg:w-48 lg:flex-col">
+            <div className="flex-1 rounded-lg border border-[var(--border)] bg-[var(--surface-2)] p-4">
+              <div className="flex items-center gap-1.5 text-sm text-[var(--text-secondary)]">
+                <span className="inline-block h-2.5 w-2.5 rounded-sm" style={{ backgroundColor: "#0ca30c" }} />
+                Paid
+              </div>
+              <div className="mt-1 text-xl font-bold text-[var(--text-primary)]">{formatCurrency(totalPaid)}</div>
+            </div>
+            <div className="flex-1 rounded-lg border border-[var(--border)] bg-[var(--surface-2)] p-4">
+              <div className="flex items-center gap-1.5 text-sm text-[var(--text-secondary)]">
+                <span className="inline-block h-2.5 w-2.5 rounded-sm" style={{ backgroundColor: "var(--brand-blue)" }} />
+                Open
+              </div>
+              <div className="mt-1 text-xl font-bold text-[var(--text-primary)]">{formatCurrency(totalOpen)}</div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
